@@ -45,13 +45,19 @@ export type Story = {
 };
 
 export type CoffeeMethod = "all" | "pourover" | "espresso" | "coldbrew";
+export type CoffeeScene = "morning" | "afternoon" | "anytime";
+export type CoffeeFlavor = "fruity" | "nutty";
 
 export type CoffeeProfile = {
   id: string;
   name: LocalizedText;
+  scene: CoffeeScene;
+  flavorFamily: CoffeeFlavor;
   roast: 1 | 2 | 3;
   acid: 1 | 2 | 3;
   method: Exclude<CoffeeMethod, "all">;
+  mark: string;
+  tag: LocalizedText;
   flavor: LocalizedText;
   description: LocalizedText;
   storySlug: string;
@@ -127,58 +133,171 @@ export const siteCopy = {
 
 export const coffeeFinderCopy = {
   zh: {
-    panelTitle: "咖啡选配器",
-    panelBody: "调整三个选项，右侧会实时推荐一篇咖啡文章。",
-    roast: "烘焙程度",
-    acid: "期望酸度",
-    method: "冲煮方式",
-    roastLabels: ["浅烘", "中烘", "深烘"],
-    acidLabels: ["低酸", "明亮", "高酸"],
+    logo: "Coffee Finder",
+    progressLabel: "进度",
+    back: "返回上一步",
+    restart: "重新配置",
+    resultEyebrow: "完美匹配",
+    resultTitle: "最适合你当前状态的咖啡",
+    resultBody: "点击一个咖啡标志，直接进入对应的博客阅读。",
+    fallbackBody: "没有完全匹配的一杯，所以先给你最接近的阅读入口。",
+    questions: [
+      {
+        step: "01 / 03",
+        title: "你通常在什么时候或什么状态下享用这杯咖啡？",
+        field: "scene",
+        options: [
+          {
+            value: "morning",
+            label: "清晨唤醒：需要瞬间提神醒脑",
+          },
+          {
+            value: "afternoon",
+            label: "午后悠闲：搭配甜点细细品味风味",
+          },
+          {
+            value: "anytime",
+            label: "全天候：随时随地想喝，不影响睡眠",
+          },
+        ],
+      },
+      {
+        step: "02 / 03",
+        title: "在风味图谱中，你更倾向于哪种调性？",
+        field: "flavor",
+        options: [
+          {
+            value: "fruity",
+            label: "明亮的水果：像柑橘、莓果或花香",
+          },
+          {
+            value: "nutty",
+            label: "醇厚的坚果：像黑巧克力、焦糖与烤坚果",
+          },
+        ],
+      },
+      {
+        step: "03 / 03",
+        title: "你打算用什么方式来冲煮它？",
+        field: "method",
+        options: [
+          {
+            value: "pourover",
+            label: "手冲滤杯、法压壶：精致慢滤",
+          },
+          {
+            value: "espresso",
+            label: "意式咖啡机、胶囊机：快速高压",
+          },
+          {
+            value: "coldbrew",
+            label: "冷萃或冰滴：夏天慢慢喝",
+          },
+        ],
+      },
+    ],
     methods: {
       all: "全部",
       pourover: "手冲滤杯",
       espresso: "意式浓缩",
       coldbrew: "冷萃/冰滴",
     },
-    resultCount: "个推荐",
-    noResult: "没有找到完全匹配的一杯。可以试着调整滑块。",
-    readStory: "查看文章",
-    bestMatch: "最接近",
+    readStory: "阅读",
   },
   en: {
-    panelTitle: "Coffee finder",
-    panelBody: "Move three controls. The right side recommends coffee stories in real time.",
-    roast: "Roast",
-    acid: "Acidity",
-    method: "Brew method",
-    roastLabels: ["Light", "Medium", "Dark"],
-    acidLabels: ["Low", "Bright", "High"],
+    logo: "Coffee Finder",
+    progressLabel: "Progress",
+    back: "Back",
+    restart: "Restart",
+    resultEyebrow: "Perfect match",
+    resultTitle: "Coffee for your current mood",
+    resultBody: "Click a coffee mark to read the matching blog story.",
+    fallbackBody: "No perfect match, so here are the closest reading paths.",
+    questions: [
+      {
+        step: "01 / 03",
+        title: "When do you usually want this coffee?",
+        field: "scene",
+        options: [
+          {
+            value: "morning",
+            label: "Morning wake-up: I need quick energy",
+          },
+          {
+            value: "afternoon",
+            label: "Slow afternoon: I want to taste the details",
+          },
+          {
+            value: "anytime",
+            label: "Any time: easy to drink and not too heavy",
+          },
+        ],
+      },
+      {
+        step: "02 / 03",
+        title: "Which flavor direction feels closer to you?",
+        field: "flavor",
+        options: [
+          {
+            value: "fruity",
+            label: "Bright fruit: citrus, berries, or flowers",
+          },
+          {
+            value: "nutty",
+            label: "Warm nuts: dark chocolate, caramel, roasted nuts",
+          },
+        ],
+      },
+      {
+        step: "03 / 03",
+        title: "How will you brew it?",
+        field: "method",
+        options: [
+          {
+            value: "pourover",
+            label: "Pour-over or French press: slow and clear",
+          },
+          {
+            value: "espresso",
+            label: "Espresso or capsule machine: fast and strong",
+          },
+          {
+            value: "coldbrew",
+            label: "Cold brew or ice drip: slow summer cup",
+          },
+        ],
+      },
+    ],
     methods: {
       all: "All",
       pourover: "Pour-over",
       espresso: "Espresso",
       coldbrew: "Cold brew",
     },
-    resultCount: "recommendations",
-    noResult: "No perfect match yet. Try moving the sliders.",
-    readStory: "Read article",
-    bestMatch: "Best match",
+    readStory: "Read",
   },
 } satisfies Record<
   Locale,
   {
-    panelTitle: string;
-    panelBody: string;
-    roast: string;
-    acid: string;
-    method: string;
-    roastLabels: string[];
-    acidLabels: string[];
+    logo: string;
+    progressLabel: string;
+    back: string;
+    restart: string;
+    resultEyebrow: string;
+    resultTitle: string;
+    resultBody: string;
+    fallbackBody: string;
+    questions: Array<{
+      step: string;
+      title: string;
+      field: "scene" | "flavor" | "method";
+      options: Array<{
+        value: CoffeeScene | CoffeeFlavor | Exclude<CoffeeMethod, "all">;
+        label: string;
+      }>;
+    }>;
     methods: Record<CoffeeMethod, string>;
-    resultCount: string;
-    noResult: string;
     readStory: string;
-    bestMatch: string;
   }
 >;
 
@@ -186,9 +305,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "yirgacheffe",
     name: { zh: "埃塞俄比亚 耶加雪菲", en: "Ethiopia Yirgacheffe" },
+    scene: "afternoon",
+    flavorFamily: "fruity",
     roast: 1,
     acid: 3,
     method: "pourover",
+    mark: "Y",
+    tag: { zh: "轻盈花果香", en: "Light floral fruit" },
     flavor: { zh: "柑橘 / 茉莉 / 清亮", en: "Citrus / jasmine / clean" },
     description: {
       zh: "适合喜欢轻盈、花香和明亮酸感的人。它像一个很容易开始的下午聊天。",
@@ -204,9 +327,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "colombia-huila",
     name: { zh: "哥伦比亚 蕙兰", en: "Colombia Huila" },
+    scene: "afternoon",
+    flavorFamily: "nutty",
     roast: 2,
     acid: 2,
     method: "pourover",
+    mark: "H",
+    tag: { zh: "坚果焦糖平衡", en: "Nutty caramel balance" },
     flavor: { zh: "坚果 / 巧克力 / 平衡", en: "Nutty / chocolate / balanced" },
     description: {
       zh: "适合第一次不知道怎么选的人。甜感和酸感都比较温和，像日常但不无聊的对话。",
@@ -222,9 +349,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "espresso-blend",
     name: { zh: "经典意式拼配", en: "Classic espresso blend" },
+    scene: "morning",
+    flavorFamily: "nutty",
     roast: 3,
     acid: 1,
     method: "espresso",
+    mark: "E",
+    tag: { zh: "意式浓郁油脂", en: "Rich espresso crema" },
     flavor: { zh: "可可 / 奶香 / 浓郁", en: "Cocoa / milk / rich" },
     description: {
       zh: "适合喜欢低酸、厚重和拿铁口感的人。它比较直接，也很适合短短的一杯时间。",
@@ -240,9 +371,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "kenya-aa",
     name: { zh: "肯尼亚 AA", en: "Kenya AA" },
+    scene: "morning",
+    flavorFamily: "fruity",
     roast: 1,
     acid: 3,
     method: "coldbrew",
+    mark: "K",
+    tag: { zh: "高酸清爽提神", en: "Bright and energetic" },
     flavor: { zh: "乌梅 / 黑加仑 / 清爽", en: "Plum / blackcurrant / fresh" },
     description: {
       zh: "适合想要冰一点、果汁感强一点的人。冷萃后会更顺口，也更适合夏天。",
@@ -258,9 +393,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "mandheling",
     name: { zh: "曼特宁 G1", en: "Mandheling G1" },
+    scene: "anytime",
+    flavorFamily: "nutty",
     roast: 3,
     acid: 1,
     method: "pourover",
+    mark: "M",
+    tag: { zh: "低酸木质醇厚", en: "Low-acid and full" },
     flavor: { zh: "木质 / 草本 / 醇厚", en: "Woody / herbal / full" },
     description: {
       zh: "适合不喜欢酸味的人。它更沉稳，适合慢慢聊家乡、生活和最近的烦恼。",
@@ -276,9 +415,13 @@ export const coffeeProfiles: CoffeeProfile[] = [
   {
     id: "toronto-cold-cup",
     name: { zh: "多伦多夏日冷杯", en: "Toronto summer cold cup" },
+    scene: "anytime",
+    flavorFamily: "fruity",
     roast: 2,
     acid: 2,
     method: "coldbrew",
+    mark: "T",
+    tag: { zh: "夏日冰感干净", en: "Clean summer cold cup" },
     flavor: { zh: "焦糖 / 冰感 / 干净", en: "Caramel / cold / clean" },
     description: {
       zh: "适合线上或多伦多的夏天。风味不太尖锐，适合边散步边聊。",

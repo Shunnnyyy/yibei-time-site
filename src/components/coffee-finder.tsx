@@ -1,15 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   coffeeFinderCopy,
   coffeeProfiles,
   withLocale,
+  type CoffeeFlavor,
   type CoffeeMethod,
   type CoffeeProfile,
+  type CoffeeScene,
 } from "@/lib/content";
 import type { Locale } from "@/lib/booking";
 
@@ -17,193 +18,219 @@ type CoffeeFinderProps = {
   locale: Locale;
 };
 
-function profileDistance(profile: CoffeeProfile, roast: number, acid: number) {
-  return Math.abs(profile.roast - roast) + Math.abs(profile.acid - acid);
+type BrewMethod = Exclude<CoffeeMethod, "all">;
+
+type QuizSelections = {
+  scene?: CoffeeScene;
+  flavor?: CoffeeFlavor;
+  method?: BrewMethod;
+};
+
+function scoreProfile(profile: CoffeeProfile, selections: QuizSelections) {
+  let score = 0;
+
+  if (profile.scene === selections.scene) {
+    score += 3;
+  }
+
+  if (profile.flavorFamily === selections.flavor) {
+    score += 3;
+  }
+
+  if (profile.method === selections.method) {
+    score += 3;
+  }
+
+  return score;
 }
 
 export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   const copy = coffeeFinderCopy[locale];
-  const [roast, setRoast] = useState(2);
-  const [acid, setAcid] = useState(2);
-  const [method, setMethod] = useState<CoffeeMethod>("all");
+  const [step, setStep] = useState(0);
+  const [selections, setSelections] = useState<QuizSelections>({});
+  const isResults = step >= copy.questions.length;
+  const progress = isResults ? 100 : ((step + 1) / copy.questions.length) * 100;
+  const currentQuestion = copy.questions[step];
 
   const matches = useMemo(() => {
-    const exact = coffeeProfiles.filter((profile) => {
-      const methodMatches = method === "all" || profile.method === method;
-      return profile.roast === roast && profile.acid === acid && methodMatches;
-    });
+    const exact = coffeeProfiles.filter(
+      (profile) =>
+        profile.scene === selections.scene &&
+        profile.flavorFamily === selections.flavor &&
+        profile.method === selections.method,
+    );
 
     if (exact.length > 0) {
       return { profiles: exact, exact: true };
     }
 
-    const closest = coffeeProfiles
-      .filter((profile) => method === "all" || profile.method === method)
-      .sort(
-        (left, right) =>
-          profileDistance(left, roast, acid) - profileDistance(right, roast, acid),
-      )
-      .slice(0, 2);
+    const bestScore = Math.max(
+      ...coffeeProfiles.map((profile) => scoreProfile(profile, selections)),
+    );
 
-    return { profiles: closest, exact: false };
-  }, [acid, method, roast]);
+    return {
+      profiles: coffeeProfiles
+        .filter((profile) => scoreProfile(profile, selections) === bestScore)
+        .slice(0, 4),
+      exact: false,
+    };
+  }, [selections]);
+
+  function chooseOption(
+    field: "scene" | "flavor" | "method",
+    value: CoffeeScene | CoffeeFlavor | BrewMethod,
+  ) {
+    setSelections((current) => ({
+      ...current,
+      [field]: value,
+    }));
+    setStep((current) => current + 1);
+  }
+
+  function goBack() {
+    setStep((current) => Math.max(0, current - 1));
+  }
+
+  function restart() {
+    setSelections({});
+    setStep(0);
+  }
 
   return (
-    <div className="grid grid-cols-1 border border-[#111] bg-white lg:grid-cols-[360px_1fr]">
-      <aside className="dot-bg border-b border-[#111] p-5 sm:p-6 lg:border-b-0 lg:border-r">
-        <div className="mb-8 flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#111] bg-white text-[#111]">
-            <SlidersHorizontal className="h-5 w-5" aria-hidden />
-          </span>
-          <div>
-            <h3 className="text-xl font-semibold leading-7 text-[#111]">
-              {copy.panelTitle}
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-[#333]">{copy.panelBody}</p>
-          </div>
+    <div className="overflow-hidden border border-[#111] bg-white">
+      <div className="h-1 bg-[#f2f2f2]" aria-label={copy.progressLabel}>
+        <div
+          className="h-full bg-[#111] transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className="grid-bg min-h-[560px] p-5 sm:p-8 lg:p-10">
+        <div className="mb-12 flex items-center justify-between gap-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#111]">
+            {copy.logo}
+          </p>
+          {step > 0 && !isResults && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+              onClick={goBack}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              {copy.back}
+            </button>
+          )}
         </div>
 
-        <div className="space-y-8">
-          <RangeControl
-            label={copy.roast}
-            value={roast}
-            labels={copy.roastLabels}
-            onChange={setRoast}
-          />
-          <RangeControl
-            label={copy.acid}
-            value={acid}
-            labels={copy.acidLabels}
-            onChange={setAcid}
-          />
-
-          <fieldset className="space-y-3">
-            <legend className="text-xs font-semibold uppercase tracking-[0.08em] text-[#555]">
-              {copy.method}
-            </legend>
-            <div className="grid grid-cols-2 gap-2">
-              {(Object.keys(copy.methods) as CoffeeMethod[]).map((option) => {
-                const isSelected = method === option;
+        {!isResults && currentQuestion ? (
+          <section className="mx-auto max-w-3xl">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#555]">
+              {currentQuestion.step}
+            </p>
+            <h3 className="mb-10 text-3xl font-semibold leading-tight text-[#111] sm:text-4xl">
+              {currentQuestion.title}
+            </h3>
+            <div className="grid grid-cols-1 gap-3">
+              {currentQuestion.options.map((option) => {
+                const isSelected =
+                  selections[currentQuestion.field] === option.value;
 
                 return (
                   <button
-                    key={option}
+                    key={option.value}
                     type="button"
-                    className={`min-h-11 border px-3 text-sm font-semibold transition ${
+                    className={`group flex min-h-20 items-center justify-between gap-5 border px-5 py-4 text-left text-base font-semibold leading-6 transition sm:px-6 ${
                       isSelected
                         ? "border-[#111] bg-[#111] text-white"
                         : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
                     }`}
                     aria-pressed={isSelected}
-                    onClick={() => setMethod(option)}
+                    onClick={() => chooseOption(currentQuestion.field, option.value)}
                   >
-                    {copy.methods[option]}
+                    <span>{option.label}</span>
+                    <ArrowRight
+                      className="h-5 w-5 shrink-0 transition group-hover:translate-x-1"
+                      aria-hidden
+                    />
                   </button>
                 );
               })}
             </div>
-          </fieldset>
-        </div>
-      </aside>
+          </section>
+        ) : (
+          <section className="mx-auto max-w-5xl text-center">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#555]">
+              {copy.resultEyebrow}
+            </p>
+            <h3 className="text-3xl font-semibold leading-tight text-[#111] sm:text-4xl">
+              {copy.resultTitle}
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#333]">
+              {matches.exact ? copy.resultBody : copy.fallbackBody}
+            </p>
 
-      <div className="grid-bg p-5 sm:p-6">
-        <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-          <p className="text-sm font-semibold text-[#111]">
-            {matches.exact
-              ? `${matches.profiles.length} ${copy.resultCount}`
-              : copy.bestMatch}
-          </p>
-          {!matches.exact && (
-            <p className="max-w-md text-sm leading-6 text-[#555]">{copy.noResult}</p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {matches.profiles.map((profile) => (
-            <Link
-              key={profile.id}
-              href={withLocale(`/stories/${profile.storySlug}`, locale)}
-              className="group flex min-h-[420px] flex-col overflow-hidden border border-[#111] bg-white transition hover:-translate-y-1 hover:shadow-[8px_8px_0_#111] focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
-                <Image
-                  src={profile.image}
-                  alt={profile.imageAlt[locale]}
-                  fill
-                  sizes="(min-width: 1280px) 24vw, (min-width: 768px) 45vw, 100vw"
-                  className="object-cover grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0"
+            <div className="mt-12 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+              {matches.profiles.map((profile) => (
+                <CoffeeMarkLink
+                  key={profile.id}
+                  locale={locale}
+                  profile={profile}
+                  methodLabel={copy.methods[profile.method]}
+                  readLabel={copy.readStory}
                 />
-              </div>
-              <div className="flex flex-1 flex-col p-5">
-                <div className="flex flex-wrap gap-2 text-xs text-[#555]">
-                  <span className="border border-[#111] bg-white px-2 py-1">
-                    {copy.roastLabels[profile.roast - 1]}
-                  </span>
-                  <span className="border border-[#111] bg-white px-2 py-1">
-                    {copy.acidLabels[profile.acid - 1]}
-                  </span>
-                  <span className="border border-[#111] bg-white px-2 py-1">
-                    {copy.methods[profile.method]}
-                  </span>
-                </div>
-                <h3 className="mt-5 text-xl font-semibold leading-7 text-[#111]">
-                  {profile.name[locale]}
-                </h3>
-                <p className="mt-2 text-sm font-semibold text-[#111]">
-                  {profile.flavor[locale]}
-                </p>
-                <p className="mt-3 flex-1 text-sm leading-6 text-[#333]">
-                  {profile.description[locale]}
-                </p>
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#111]">
-                  {copy.readStory}
-                  <ArrowRight
-                    className="h-4 w-4 transition group-hover:translate-x-1"
-                    aria-hidden
-                  />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="mt-12 inline-flex items-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
+              onClick={restart}
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden />
+              {copy.restart}
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );
 }
 
-type RangeControlProps = {
-  label: string;
-  value: number;
-  labels: string[];
-  onChange: (value: number) => void;
+type CoffeeMarkLinkProps = {
+  locale: Locale;
+  profile: CoffeeProfile;
+  methodLabel: string;
+  readLabel: string;
 };
 
-function RangeControl({ label, value, labels, onChange }: RangeControlProps) {
+function CoffeeMarkLink({
+  locale,
+  profile,
+  methodLabel,
+  readLabel,
+}: CoffeeMarkLinkProps) {
   return (
-    <label className="block space-y-4">
-      <span className="flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#555]">
-          {label}
-        </span>
-        <span className="border border-[#111] bg-white px-2 py-1 text-xs font-semibold text-[#111]">
-          {labels[value - 1]}
-        </span>
+    <Link
+      href={withLocale(`/stories/${profile.storySlug}`, locale)}
+      className="group flex flex-col items-center text-center text-[#111] focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-4"
+    >
+      <span className="flex aspect-square w-full max-w-[150px] items-center justify-center rounded-full border border-[#111] bg-white text-5xl font-semibold tracking-normal transition group-hover:-translate-y-1 group-hover:bg-[#111] group-hover:text-white sm:text-6xl">
+        {profile.mark}
       </span>
-      <input
-        type="range"
-        min={1}
-        max={3}
-        step={1}
-        value={value}
-        className="coffee-range w-full"
-        onChange={(event) => onChange(Number(event.target.value))}
-        onInput={(event) => onChange(Number(event.currentTarget.value))}
-      />
-      <span className="flex justify-between text-xs text-[#555]">
-        {labels.map((rangeLabel) => (
-          <span key={rangeLabel}>{rangeLabel}</span>
-        ))}
+      <span className="mt-4 text-sm font-semibold leading-5">
+        {profile.name[locale]}
       </span>
-    </label>
+      <span className="mt-1 text-xs uppercase tracking-[0.08em] text-[#555]">
+        {profile.tag[locale]}
+      </span>
+      <span className="mt-2 text-xs text-[#555]">{methodLabel}</span>
+      <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">
+        {readLabel}
+        <ArrowRight
+          className="h-4 w-4 transition group-hover:translate-x-1"
+          aria-hidden
+        />
+      </span>
+    </Link>
   );
 }
