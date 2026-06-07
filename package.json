@@ -1,26 +1,32 @@
 {
-  "name": "yibei-time-site-scaffold-1780780234",
+  "name": "yibei-time-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
+    "lucide-react": "^1.17.0",
+    "luxon": "^3.7.2",
     "next": "16.2.7",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/luxon": "^3.7.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }
