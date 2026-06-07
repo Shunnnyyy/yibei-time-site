@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Globe2, Mail, MapPin } from "lucide-react";
 import { BookingForm } from "@/components/booking-form";
-import { CoffeeFinder } from "@/components/coffee-finder";
 import { SiteHeader } from "@/components/site-header";
 import { StoryPreview } from "@/components/story-preview";
 import {
+  coffeeFinderCopy,
   getLocale,
   siteCopy,
   stories,
@@ -23,6 +23,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const locale = getLocale(params?.lang);
   const copy = siteCopy[locale];
+  const finderCopy = coffeeFinderCopy[locale];
 
   return (
     <main className="min-h-screen bg-white text-[#111]">
@@ -92,15 +93,45 @@ export default async function Home({ searchParams }: HomeProps) {
         id="coffee-finder"
         className="mx-auto max-w-7xl border-x border-[#111] px-5 py-14 sm:px-8"
       >
-        <div className="mb-8 max-w-3xl">
-          <h2 className="text-3xl font-semibold leading-10 text-[#111]">
-            {copy.coffeeFinderTitle}
-          </h2>
-          <p className="mt-2 text-base leading-7 text-[#333]">
-            {copy.coffeeFinderBody}
-          </p>
+        <div className="grid-bg grid grid-cols-1 gap-8 border border-[#111] bg-white p-5 sm:p-8 lg:grid-cols-[0.85fr_1fr] lg:items-center">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
+              {finderCopy.eyebrow}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold leading-10 text-[#111]">
+              {copy.coffeeFinderTitle}
+            </h2>
+            <p className="mt-3 text-base leading-7 text-[#333]">
+              {copy.coffeeFinderBody}
+            </p>
+            <Link
+              href={withLocale("/coffee-finder", locale)}
+              className="mt-6 inline-flex items-center gap-2 border border-[#111] bg-white px-4 py-3 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+            >
+              {finderCopy.homeCta}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+          <div className="relative min-h-[230px] overflow-hidden border border-[#111] bg-white">
+            <div className="pointer-events-none absolute inset-0 dot-bg opacity-20" />
+            {["Y", "H", "E", "K", "M", "T"].map((mark, index) => (
+              <span
+                key={mark}
+                className="absolute flex items-center justify-center rounded-full border border-[#111] bg-white font-semibold text-[#111] shadow-[0_16px_28px_rgba(0,0,0,0.08)]"
+                style={{
+                  width: index % 2 === 0 ? 82 : 62,
+                  height: index % 2 === 0 ? 82 : 62,
+                  left: `${12 + index * 14}%`,
+                  top: `${index % 2 === 0 ? 24 : 55}%`,
+                  transform: `translate(-50%, -50%) rotate(${index % 2 === 0 ? -6 : 8}deg)`,
+                  fontSize: index % 2 === 0 ? 30 : 24,
+                }}
+              >
+                {mark}
+              </span>
+            ))}
+          </div>
         </div>
-        <CoffeeFinder locale={locale} />
       </section>
 
       <section

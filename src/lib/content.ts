@@ -47,6 +47,14 @@ export type Story = {
 export type CoffeeMethod = "all" | "pourover" | "espresso" | "coldbrew";
 export type CoffeeScene = "morning" | "afternoon" | "anytime";
 export type CoffeeFlavor = "fruity" | "nutty";
+export type CoffeeTimeBand = "morning" | "afternoon" | "evening" | "anytime";
+export type CoffeeAgeBand =
+  | "teen"
+  | "student"
+  | "young_adult"
+  | "adult"
+  | "open";
+export type CoffeeSize = "sm" | "md" | "lg";
 
 export type CoffeeProfile = {
   id: string;
@@ -61,6 +69,14 @@ export type CoffeeProfile = {
   flavor: LocalizedText;
   description: LocalizedText;
   storySlug: string;
+  timeBand: CoffeeTimeBand;
+  ageBand: CoffeeAgeBand;
+  baseSize: CoffeeSize;
+  scatter: {
+    x: number;
+    y: number;
+    rotate: number;
+  };
   image: string;
   imageAlt: LocalizedText;
 };
@@ -70,6 +86,7 @@ export const locales: Locale[] = ["zh", "en"];
 export const siteCopy = {
   zh: {
     navStories: "故事",
+    navCoffee: "咖啡",
     navBooking: "预约",
     navAbout: "关于",
     language: "English",
@@ -82,7 +99,7 @@ export const siteCopy = {
     windowsTitle: "时间和地点",
     coffeeFinderTitle: "找到适合你的一杯",
     coffeeFinderBody:
-      "像选择一把椅子一样选择咖啡。调整烘焙、酸度和冲煮方式，找到最适合今天心情的文章入口。",
+      "进入一个像 Vitra 选择器一样的咖啡阅读墙。滑动时间和年龄段，或者直接点一个咖啡标志开始读。",
     storiesTitle: "最近的故事",
     storiesBody: "真实聊天后会更新文章。现在先放项目笔记和路线计划。",
     readAll: "阅读全部",
@@ -100,6 +117,7 @@ export const siteCopy = {
   },
   en: {
     navStories: "Stories",
+    navCoffee: "Coffee",
     navBooking: "Book",
     navAbout: "About",
     language: "中文",
@@ -112,7 +130,7 @@ export const siteCopy = {
     windowsTitle: "Time and place",
     coffeeFinderTitle: "Find your cup",
     coffeeFinderBody:
-      "Choose coffee like choosing a chair. Adjust roast, acidity, and brew method to find the story that fits today.",
+      "Enter a Vitra-style coffee reading wall. Slide time and age range, or click a coffee mark to start reading.",
     storiesTitle: "Recent stories",
     storiesBody:
       "Real stories will come after the chats. For now, these are project notes and route plans.",
@@ -133,171 +151,87 @@ export const siteCopy = {
 
 export const coffeeFinderCopy = {
   zh: {
-    logo: "Coffee Finder",
-    progressLabel: "进度",
-    back: "返回上一步",
-    restart: "重新配置",
-    resultEyebrow: "完美匹配",
-    resultTitle: "最适合你当前状态的咖啡",
-    resultBody: "点击一个咖啡标志，直接进入对应的博客阅读。",
-    fallbackBody: "没有完全匹配的一杯，所以先给你最接近的阅读入口。",
-    questions: [
-      {
-        step: "01 / 03",
-        title: "你通常在什么时候或什么状态下享用这杯咖啡？",
-        field: "scene",
-        options: [
-          {
-            value: "morning",
-            label: "清晨唤醒：需要瞬间提神醒脑",
-          },
-          {
-            value: "afternoon",
-            label: "午后悠闲：搭配甜点细细品味风味",
-          },
-          {
-            value: "anytime",
-            label: "全天候：随时随地想喝，不影响睡眠",
-          },
-        ],
-      },
-      {
-        step: "02 / 03",
-        title: "在风味图谱中，你更倾向于哪种调性？",
-        field: "flavor",
-        options: [
-          {
-            value: "fruity",
-            label: "明亮的水果：像柑橘、莓果或花香",
-          },
-          {
-            value: "nutty",
-            label: "醇厚的坚果：像黑巧克力、焦糖与烤坚果",
-          },
-        ],
-      },
-      {
-        step: "03 / 03",
-        title: "你打算用什么方式来冲煮它？",
-        field: "method",
-        options: [
-          {
-            value: "pourover",
-            label: "手冲滤杯、法压壶：精致慢滤",
-          },
-          {
-            value: "espresso",
-            label: "意式咖啡机、胶囊机：快速高压",
-          },
-          {
-            value: "coldbrew",
-            label: "冷萃或冰滴：夏天慢慢喝",
-          },
-        ],
-      },
-    ],
-    methods: {
-      all: "全部",
-      pourover: "手冲滤杯",
-      espresso: "意式浓缩",
-      coldbrew: "冷萃/冰滴",
+    eyebrow: "Coffee Finder",
+    pageTitle: "选一杯，进入一个故事",
+    pageBody:
+      "每个咖啡标志都是一篇博客入口。你可以直接点，也可以用下面的小转盘按聊天时间和年龄段找到更贴近的一杯。",
+    homeCta: "进入咖啡选择器",
+    allStories: "全部故事",
+    backHome: "返回首页",
+    openStory: "点击阅读故事",
+    selectedLabel: "当前推荐",
+    helperText: "年龄只显示宽泛区间，用来保护聊天者隐私。",
+    controlsTitle: "调整阅读线索",
+    timeLabel: "聊天时间",
+    ageLabel: "年龄段",
+    timeSliderLabel: "选择聊天发生时间",
+    ageSliderLabel: "选择聊天者年龄段",
+    dialHint: "滑动后，最匹配的咖啡会转到视觉中心并放大。",
+    timeBands: {
+      morning: "早晨",
+      afternoon: "下午",
+      evening: "夜晚",
+      anytime: "不限",
     },
-    readStory: "阅读",
+    ageBands: {
+      teen: "15-18",
+      student: "大学生",
+      young_adult: "初入职场",
+      adult: "25+",
+      open: "不公开",
+    },
   },
   en: {
-    logo: "Coffee Finder",
-    progressLabel: "Progress",
-    back: "Back",
-    restart: "Restart",
-    resultEyebrow: "Perfect match",
-    resultTitle: "Coffee for your current mood",
-    resultBody: "Click a coffee mark to read the matching blog story.",
-    fallbackBody: "No perfect match, so here are the closest reading paths.",
-    questions: [
-      {
-        step: "01 / 03",
-        title: "When do you usually want this coffee?",
-        field: "scene",
-        options: [
-          {
-            value: "morning",
-            label: "Morning wake-up: I need quick energy",
-          },
-          {
-            value: "afternoon",
-            label: "Slow afternoon: I want to taste the details",
-          },
-          {
-            value: "anytime",
-            label: "Any time: easy to drink and not too heavy",
-          },
-        ],
-      },
-      {
-        step: "02 / 03",
-        title: "Which flavor direction feels closer to you?",
-        field: "flavor",
-        options: [
-          {
-            value: "fruity",
-            label: "Bright fruit: citrus, berries, or flowers",
-          },
-          {
-            value: "nutty",
-            label: "Warm nuts: dark chocolate, caramel, roasted nuts",
-          },
-        ],
-      },
-      {
-        step: "03 / 03",
-        title: "How will you brew it?",
-        field: "method",
-        options: [
-          {
-            value: "pourover",
-            label: "Pour-over or French press: slow and clear",
-          },
-          {
-            value: "espresso",
-            label: "Espresso or capsule machine: fast and strong",
-          },
-          {
-            value: "coldbrew",
-            label: "Cold brew or ice drip: slow summer cup",
-          },
-        ],
-      },
-    ],
-    methods: {
-      all: "All",
-      pourover: "Pour-over",
-      espresso: "Espresso",
-      coldbrew: "Cold brew",
+    eyebrow: "Coffee Finder",
+    pageTitle: "Pick a cup, enter a story",
+    pageBody:
+      "Each coffee mark is a reading path. Click one directly, or use the small dial to match by chat time and broad age range.",
+    homeCta: "Open coffee finder",
+    allStories: "All stories",
+    backHome: "Back home",
+    openStory: "Read story",
+    selectedLabel: "Current match",
+    helperText: "Age uses broad ranges only, so the person stays private.",
+    controlsTitle: "Adjust reading clues",
+    timeLabel: "Chat time",
+    ageLabel: "Age range",
+    timeSliderLabel: "Choose the chat time",
+    ageSliderLabel: "Choose the person age range",
+    dialHint: "When you slide, the closest coffee moves into focus.",
+    timeBands: {
+      morning: "Morning",
+      afternoon: "Afternoon",
+      evening: "Evening",
+      anytime: "Anytime",
     },
-    readStory: "Read",
+    ageBands: {
+      teen: "15-18",
+      student: "Student",
+      young_adult: "First job",
+      adult: "25+",
+      open: "Private",
+    },
   },
 } satisfies Record<
   Locale,
   {
-    logo: string;
-    progressLabel: string;
-    back: string;
-    restart: string;
-    resultEyebrow: string;
-    resultTitle: string;
-    resultBody: string;
-    fallbackBody: string;
-    questions: Array<{
-      step: string;
-      title: string;
-      field: "scene" | "flavor" | "method";
-      options: Array<{
-        value: CoffeeScene | CoffeeFlavor | Exclude<CoffeeMethod, "all">;
-        label: string;
-      }>;
-    }>;
-    methods: Record<CoffeeMethod, string>;
-    readStory: string;
+    eyebrow: string;
+    pageTitle: string;
+    pageBody: string;
+    homeCta: string;
+    allStories: string;
+    backHome: string;
+    openStory: string;
+    selectedLabel: string;
+    helperText: string;
+    controlsTitle: string;
+    timeLabel: string;
+    ageLabel: string;
+    timeSliderLabel: string;
+    ageSliderLabel: string;
+    dialHint: string;
+    timeBands: Record<CoffeeTimeBand, string>;
+    ageBands: Record<CoffeeAgeBand, string>;
   }
 >;
 
@@ -318,6 +252,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "For people who like light body, floral notes, and bright acidity. It feels like an easy afternoon talk.",
     },
     storySlug: "why-one-cup",
+    timeBand: "afternoon",
+    ageBand: "student",
+    baseSize: "md",
+    scatter: { x: 12, y: 22, rotate: -10 },
     image: "/images/story-online.jpg",
     imageAlt: {
       zh: "桌面上的咖啡、笔记本和电脑",
@@ -340,6 +278,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "A good first choice. Sweetness and acidity stay gentle, like a daily conversation that is not boring.",
     },
     storySlug: "fuzhou-summer-route",
+    timeBand: "afternoon",
+    ageBand: "young_adult",
+    baseSize: "lg",
+    scatter: { x: 31, y: 14, rotate: 5 },
     image: "/images/story-fuzhou.jpg",
     imageAlt: {
       zh: "福州街道和城市建筑",
@@ -362,6 +304,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "For people who like low acidity, heavy body, and latte texture. It is direct and works well for one short cup.",
     },
     storySlug: "toronto-online",
+    timeBand: "morning",
+    ageBand: "adult",
+    baseSize: "lg",
+    scatter: { x: 58, y: 16, rotate: -3 },
     image: "/images/coffee-hero.jpg",
     imageAlt: {
       zh: "窗边热咖啡照片",
@@ -384,6 +330,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "For people who want something cold and fruity. Cold brew makes it smoother and very summer-friendly.",
     },
     storySlug: "why-one-cup",
+    timeBand: "morning",
+    ageBand: "teen",
+    baseSize: "md",
+    scatter: { x: 80, y: 22, rotate: 9 },
     image: "/images/story-online.jpg",
     imageAlt: {
       zh: "桌面上的咖啡、笔记本和电脑",
@@ -406,6 +356,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "For people who do not like sour coffee. It feels calm and suits slower talks about home and life.",
     },
     storySlug: "fuzhou-summer-route",
+    timeBand: "evening",
+    ageBand: "adult",
+    baseSize: "sm",
+    scatter: { x: 19, y: 58, rotate: -7 },
     image: "/images/story-fuzhou.jpg",
     imageAlt: {
       zh: "福州街道和城市建筑",
@@ -428,6 +382,10 @@ export const coffeeProfiles: CoffeeProfile[] = [
       en: "Good for online chats or a Toronto summer. It is not too sharp, nice for walking and talking.",
     },
     storySlug: "toronto-online",
+    timeBand: "anytime",
+    ageBand: "open",
+    baseSize: "md",
+    scatter: { x: 71, y: 57, rotate: 4 },
     image: "/images/story-toronto.jpg",
     imageAlt: {
       zh: "多伦多湖边城市天际线",

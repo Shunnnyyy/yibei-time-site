@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, BookOpen, Sparkle } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import * as Slider from "@radix-ui/react-slider";
+import { useMemo, useState } from "react";
 import {
   coffeeFinderCopy,
   coffeeProfiles,
   withLocale,
-  type CoffeeFlavor,
-  type CoffeeMethod,
+  type CoffeeAgeBand,
   type CoffeeProfile,
-  type CoffeeScene,
+  type CoffeeTimeBand,
 } from "@/lib/content";
 import type { Locale } from "@/lib/booking";
 
@@ -18,214 +19,376 @@ type CoffeeFinderProps = {
   locale: Locale;
 };
 
-type BrewMethod = Exclude<CoffeeMethod, "all">;
-
-type QuizSelections = {
-  scene?: CoffeeScene;
-  flavor?: CoffeeFlavor;
-  method?: BrewMethod;
-};
-
-const objectPositions = [
-  "lg:left-[6%] lg:top-[9%]",
-  "lg:left-[26%] lg:top-[10%]",
-  "lg:left-[54%] lg:top-[8%]",
-  "lg:left-[76%] lg:top-[12%]",
-  "lg:left-[11%] lg:top-[55%]",
-  "lg:left-[72%] lg:top-[57%]",
+const timeBands: CoffeeTimeBand[] = [
+  "morning",
+  "afternoon",
+  "evening",
+  "anytime",
 ];
 
-function scoreProfile(profile: CoffeeProfile, selections: QuizSelections) {
+const ageBands: CoffeeAgeBand[] = [
+  "teen",
+  "student",
+  "young_adult",
+  "adult",
+  "open",
+];
+
+const orbitSlots = [
+  { x: 50, y: 51 },
+  { x: 17, y: 22 },
+  { x: 82, y: 24 },
+  { x: 25, y: 65 },
+  { x: 72, y: 63 },
+  { x: 50, y: 72 },
+];
+
+const baseSizes = {
+  sm: 84,
+  md: 110,
+  lg: 132,
+} satisfies Record<CoffeeProfile["baseSize"], number>;
+
+function scoreCoffee(
+  profile: CoffeeProfile,
+  timeBand: CoffeeTimeBand,
+  ageBand: CoffeeAgeBand,
+) {
   let score = 0;
 
-  if (profile.scene === selections.scene) score += 1;
-  if (profile.flavorFamily === selections.flavor) score += 1;
-  if (profile.method === selections.method) score += 1;
+  if (profile.timeBand === timeBand) score += 6;
+  if (profile.timeBand === "anytime" || timeBand === "anytime") score += 2;
+  if (profile.ageBand === ageBand) score += 4;
+  if (profile.ageBand === "open" || ageBand === "open") score += 1;
 
   return score;
 }
 
-function hasSelections(selections: QuizSelections) {
-  return Boolean(selections.scene || selections.flavor || selections.method);
-}
-
 export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   const copy = coffeeFinderCopy[locale];
-  const [step, setStep] = useState(0);
-  const [selections, setSelections] = useState<QuizSelections>({});
-  const isComplete = step >= copy.questions.length;
-  const currentQuestion = copy.questions[step];
-  const progress = isComplete ? 100 : ((step + 1) / copy.questions.length) * 100;
-  const bestScore = Math.max(
-    ...coffeeProfiles.map((profile) => scoreProfile(profile, selections)),
+  const prefersReducedMotion = useReducedMotion();
+  const [timeIndex, setTimeIndex] = useState(1);
+  const [ageIndex, setAgeIndex] = useState(1);
+
+  const selectedTime = timeBands[timeIndex] ?? "afternoon";
+  const selectedAge = ageBands[ageIndex] ?? "student";
+
+  const rankedProfiles = useMemo(() => {
+    return coffeeProfiles
+      .map((profile, index) => ({
+        profile,
+        score: scoreCoffee(profile, selectedTime, selectedAge),
+        index,
+      }))
+      .sort((a, b) => b.score - a.score || a.index - b.index);
+  }, [selectedAge, selectedTime]);
+
+  const activeProfile = rankedProfiles[0]?.profile ?? coffeeProfiles[0];
+  const activeIndex = coffeeProfiles.findIndex(
+    (profile) => profile.id === activeProfile.id,
   );
-  const shouldHighlight = hasSelections(selections) && bestScore > 0;
-
-  function chooseOption(
-    field: "scene" | "flavor" | "method",
-    value: CoffeeScene | CoffeeFlavor | BrewMethod,
-  ) {
-    setSelections((current) => ({
-      ...current,
-      [field]: value,
-    }));
-    setStep((current) => Math.min(current + 1, copy.questions.length));
-  }
-
-  function goBack() {
-    setStep((current) => Math.max(0, current - 1));
-  }
-
-  function restart() {
-    setSelections({});
-    setStep(0);
-  }
+  const dialRotation = timeIndex * 18 + ageIndex * 11;
 
   return (
-    <div className="overflow-hidden border border-[#111] bg-[#f8f8f8]">
-      <div className="h-1 bg-[#e8e8e8]" aria-label={copy.progressLabel}>
-        <div
-          className="h-full bg-[#111] transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+    <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-white text-[#111]">
+      <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
+      <div className="pointer-events-none absolute inset-0 dot-bg opacity-[0.18]" />
 
-      <div className="relative min-h-[740px] overflow-hidden bg-[#f8f8f8] px-5 py-8 sm:px-8 lg:min-h-[680px]">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-70" />
-        <div className="relative z-10 flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#111]">
-            {copy.logo}
-          </p>
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl flex-col border-x border-[#111] px-5 pb-8 pt-5 sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href={withLocale("/", locale)}
+            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold transition hover:bg-[#111] hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {copy.backHome}
+          </Link>
           <Link
             href={withLocale("/stories", locale)}
-            className="border border-[#111] bg-white px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold transition hover:bg-[#111] hover:text-white"
           >
-            {locale === "zh" ? "全部文章" : "All stories"}
+            {copy.allStories}
+            <BookOpen className="h-4 w-4" aria-hidden />
           </Link>
         </div>
 
-        <section className="relative z-20 mx-auto mt-8 w-full max-w-[360px] border border-[#111] bg-white/95 p-3 shadow-[6px_6px_0_#111] backdrop-blur sm:max-w-[420px] sm:p-4 lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center border border-[#111] bg-white text-[#111] transition disabled:opacity-25 enabled:hover:bg-[#111] enabled:hover:text-white"
-              disabled={step === 0}
-              onClick={goBack}
-              aria-label={copy.back}
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-            </button>
-
-            <div className="text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#555]">
-                {isComplete ? copy.resultEyebrow : currentQuestion.step}
-              </p>
-              <h3 className="mt-1 text-base font-semibold leading-6 text-[#111]">
-                {isComplete ? copy.resultTitle : currentQuestion.title}
-              </h3>
-            </div>
-
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center border border-[#111] bg-white text-[#111] transition hover:bg-[#111] hover:text-white"
-              onClick={isComplete ? restart : () => setStep((current) => current + 1)}
-              aria-label={isComplete ? copy.restart : copy.readStory}
-            >
-              {isComplete ? (
-                <RotateCcw className="h-4 w-4" aria-hidden />
-              ) : (
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              )}
-            </button>
-          </div>
-
-          {isComplete ? (
-            <p className="px-2 pb-1 text-center text-sm leading-6 text-[#333]">
-              {shouldHighlight ? copy.resultBody : copy.fallbackBody}
+        <div className="relative flex flex-1 flex-col gap-6 pb-[240px] pt-6 lg:min-h-[700px] lg:pb-[190px]">
+          <motion.div
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="relative z-30 mx-auto w-full max-w-[390px] border border-[#111] bg-white/95 p-3 text-center shadow-[5px_5px_0_#111] backdrop-blur lg:absolute lg:left-1/2 lg:top-5 lg:-translate-x-1/2"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
+              {copy.eyebrow}
             </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {currentQuestion.options.map((option) => {
-                const isSelected =
-                  selections[currentQuestion.field] === option.value;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`flex min-h-11 items-center justify-center gap-2 border px-3 py-2 text-sm font-semibold leading-5 transition ${
-                      isSelected
-                        ? "border-[#111] bg-[#111] text-white"
-                        : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
-                    }`}
-                    aria-pressed={isSelected}
-                    onClick={() => chooseOption(currentQuestion.field, option.value)}
-                  >
-                    {isSelected && <Check className="h-4 w-4" aria-hidden />}
-                    <span>{option.label}</span>
-                  </button>
-                );
-              })}
+            <h1 className="mt-2 text-xl font-semibold leading-tight text-[#111] sm:text-2xl">
+              {copy.pageTitle}
+            </h1>
+            <p className="mt-2 text-xs leading-5 text-[#333]">{copy.pageBody}</p>
+            <div className="mt-3 border border-[#111] bg-[#f7f7f7] p-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+                {copy.selectedLabel}
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#111]">
+                {activeProfile.name[locale]}
+              </p>
+              <p className="mt-1 text-[11px] leading-4 text-[#444]">
+                {activeProfile.flavor[locale]}
+              </p>
             </div>
-          )}
-        </section>
+          </motion.div>
 
-        <div className="relative z-0 mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:absolute lg:inset-0 lg:mt-0 lg:block lg:pb-0">
-          {coffeeProfiles.map((profile, index) => {
-            const score = scoreProfile(profile, selections);
-            const isHighlighted = !shouldHighlight || score === bestScore;
+          <div
+            className="relative z-20 grid min-h-[520px] grid-cols-2 items-center gap-x-4 gap-y-8 pt-2 sm:grid-cols-3 lg:absolute lg:inset-0 lg:block lg:pt-0"
+            aria-label={copy.pageTitle}
+          >
+            {coffeeProfiles.map((profile, index) => {
+              const isActive = profile.id === activeProfile.id;
+              const orbitIndex =
+                (index - activeIndex + coffeeProfiles.length) %
+                coffeeProfiles.length;
+              const slot = orbitSlots[orbitIndex] ?? {
+                x: profile.scatter.x,
+                y: profile.scatter.y,
+              };
+              const score = scoreCoffee(profile, selectedTime, selectedAge);
 
-            return (
-              <CoffeeObject
-                key={profile.id}
-                locale={locale}
-                profile={profile}
-                methodLabel={copy.methods[profile.method]}
-                className={objectPositions[index] ?? ""}
-                highlighted={isHighlighted}
-              />
-            );
-          })}
+              return (
+                <CoffeeMark
+                  key={profile.id}
+                  locale={locale}
+                  profile={profile}
+                  isActive={isActive}
+                  score={score}
+                  slot={slot}
+                  index={index}
+                  prefersReducedMotion={Boolean(prefersReducedMotion)}
+                />
+              );
+            })}
+          </div>
         </div>
 
+        <CoffeeDial
+          locale={locale}
+          timeIndex={timeIndex}
+          ageIndex={ageIndex}
+          activeProfile={activeProfile}
+          dialRotation={dialRotation}
+          onTimeChange={setTimeIndex}
+          onAgeChange={setAgeIndex}
+        />
+      </div>
+    </section>
+  );
+}
+
+type CoffeeMarkProps = {
+  locale: Locale;
+  profile: CoffeeProfile;
+  isActive: boolean;
+  score: number;
+  slot: { x: number; y: number };
+  index: number;
+  prefersReducedMotion: boolean;
+};
+
+function CoffeeMark({
+  locale,
+  profile,
+  isActive,
+  score,
+  slot,
+  index,
+  prefersReducedMotion,
+}: CoffeeMarkProps) {
+  const copy = coffeeFinderCopy[locale];
+  const size = baseSizes[profile.baseSize];
+  const activeSize = Math.round(size * 1.2);
+  const visualSize = isActive ? activeSize : size;
+  const opacity = isActive ? 1 : score > 0 ? 0.58 : 0.32;
+  const floatY = prefersReducedMotion ? 0 : isActive ? -5 : index % 2 ? 5 : -4;
+
+  return (
+    <motion.div
+      className="group relative flex justify-center lg:absolute"
+      style={{
+        left: `${slot.x}%`,
+        top: `${slot.y}%`,
+        translate: "-50% -50%",
+        zIndex: isActive ? 22 : 10 - index,
+      }}
+      animate={{
+        left: `${slot.x}%`,
+        top: `${slot.y}%`,
+        opacity,
+      }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: "easeOut" }}
+    >
+      <Link
+        href={withLocale(`/stories/${profile.storySlug}`, locale)}
+        aria-label={`${copy.openStory}: ${profile.name[locale]}, ${profile.flavor[locale]}`}
+        data-coffee-id={profile.id}
+        data-active={isActive}
+        className="relative flex flex-col items-center text-center outline-none"
+      >
+        <motion.span
+          className="relative flex items-center justify-center rounded-full border border-[#111] bg-white font-semibold text-[#111] shadow-[0_20px_35px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-[#111] group-hover:text-white group-focus-visible:bg-[#111] group-focus-visible:text-white"
+          style={{
+            width: visualSize,
+            height: visualSize,
+            fontSize: Math.round(visualSize * 0.4),
+          }}
+          animate={{
+            y: [0, floatY, 0],
+            rotate: isActive ? 0 : profile.scatter.rotate,
+            scale: isActive ? 1.08 : 1,
+          }}
+          transition={{
+            y: {
+              duration: prefersReducedMotion ? 0 : 4.6 + index * 0.2,
+              repeat: prefersReducedMotion ? 0 : Infinity,
+              ease: "easeInOut",
+            },
+            rotate: { duration: prefersReducedMotion ? 0 : 0.7 },
+            scale: { duration: prefersReducedMotion ? 0 : 0.45 },
+          }}
+        >
+          <span className="absolute -bottom-2 h-3 w-2/3 rounded-[50%] bg-black/10 blur-[2px]" />
+          <span className="relative">{profile.mark}</span>
+        </motion.span>
+
+        <span className="mt-3 max-w-[13rem] border border-[#111] bg-white px-3 py-2 text-xs font-semibold leading-5 text-[#111] opacity-0 shadow-[3px_3px_0_#111] transition group-hover:opacity-100 group-focus-visible:opacity-100">
+          {profile.name[locale]}
+          <span className="block font-normal text-[#444]">
+            {profile.tag[locale]} / {profile.flavor[locale]}
+          </span>
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
+type CoffeeDialProps = {
+  locale: Locale;
+  timeIndex: number;
+  ageIndex: number;
+  activeProfile: CoffeeProfile;
+  dialRotation: number;
+  onTimeChange: (value: number) => void;
+  onAgeChange: (value: number) => void;
+};
+
+function CoffeeDial({
+  locale,
+  timeIndex,
+  ageIndex,
+  activeProfile,
+  dialRotation,
+  onTimeChange,
+  onAgeChange,
+}: CoffeeDialProps) {
+  const copy = coffeeFinderCopy[locale];
+  const selectedTime = timeBands[timeIndex] ?? "afternoon";
+  const selectedAge = ageBands[ageIndex] ?? "student";
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#111] bg-white/95 px-5 pb-5 pt-10 backdrop-blur sm:px-8">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-28 w-[290px] -translate-x-1/2 -translate-y-[74px] overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[290px] rounded-full border border-[#111] bg-white" />
+        <motion.div
+          className="absolute left-1/2 top-[76px] h-[92px] w-px origin-top bg-[#111]"
+          animate={{ rotate: dialRotation }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+        />
+        <div className="absolute left-1/2 top-4 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-[#111] bg-white text-xs font-semibold shadow-[3px_3px_0_#111]">
+          {activeProfile.mark}
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[0.8fr_1fr_1fr] lg:items-end">
+        <div>
+          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+            <Sparkle className="h-3.5 w-3.5" aria-hidden />
+            {copy.controlsTitle}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[#333]">{copy.dialHint}</p>
+          <p className="mt-1 text-xs leading-5 text-[#555]">{copy.helperText}</p>
+        </div>
+
+        <DialSlider
+          label={copy.timeLabel}
+          ariaLabel={copy.timeSliderLabel}
+          value={timeIndex}
+          max={timeBands.length - 1}
+          valueLabel={copy.timeBands[selectedTime]}
+          tickLabels={timeBands.map((band) => copy.timeBands[band])}
+          onChange={onTimeChange}
+        />
+
+        <DialSlider
+          label={copy.ageLabel}
+          ariaLabel={copy.ageSliderLabel}
+          value={ageIndex}
+          max={ageBands.length - 1}
+          valueLabel={copy.ageBands[selectedAge]}
+          tickLabels={ageBands.map((band) => copy.ageBands[band])}
+          onChange={onAgeChange}
+        />
       </div>
     </div>
   );
 }
 
-type CoffeeObjectProps = {
-  locale: Locale;
-  profile: CoffeeProfile;
-  methodLabel: string;
-  className: string;
-  highlighted: boolean;
+type DialSliderProps = {
+  label: string;
+  ariaLabel: string;
+  value: number;
+  max: number;
+  valueLabel: string;
+  tickLabels: string[];
+  onChange: (value: number) => void;
 };
 
-function CoffeeObject({
-  locale,
-  profile,
-  methodLabel,
-  className,
-  highlighted,
-}: CoffeeObjectProps) {
+function DialSlider({
+  label,
+  ariaLabel,
+  value,
+  max,
+  valueLabel,
+  tickLabels,
+  onChange,
+}: DialSliderProps) {
   return (
-    <Link
-      href={withLocale(`/stories/${profile.storySlug}`, locale)}
-      aria-label={`${profile.name[locale]} ${profile.tag[locale]}`}
-      className={`group flex flex-col items-center text-center transition duration-300 lg:absolute lg:w-[160px] ${className} ${
-        highlighted ? "opacity-100" : "opacity-25 grayscale"
-      }`}
-    >
-      <span className="relative flex h-24 w-24 items-center justify-center rounded-full border border-[#111] bg-white text-4xl font-semibold text-[#111] shadow-[0_18px_35px_rgba(0,0,0,0.08)] transition group-hover:-translate-y-1 group-hover:bg-[#111] group-hover:text-white sm:h-28 sm:w-28">
-        <span className="absolute -bottom-2 h-3 w-16 rounded-[50%] bg-black/10 blur-[2px]" />
-        <span className="relative">{profile.mark}</span>
-      </span>
-      <span className="mt-3 max-w-[10rem] text-xs font-semibold leading-4 text-[#111] opacity-0 transition group-hover:opacity-100 group-focus:opacity-100">
-        {profile.name[locale]}
-      </span>
-      <span className="mt-1 max-w-[10rem] text-[11px] leading-4 text-[#555] opacity-0 transition group-hover:opacity-100 group-focus:opacity-100">
-        {profile.tag[locale]} · {methodLabel}
-      </span>
-    </Link>
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[#111]">{label}</p>
+        <p className="border border-[#111] bg-white px-2 py-1 text-xs font-semibold text-[#111]">
+          {valueLabel}
+        </p>
+      </div>
+      <Slider.Root
+        aria-label={ariaLabel}
+        value={[value]}
+        min={0}
+        max={max}
+        step={1}
+        onValueChange={(nextValue) => onChange(nextValue[0] ?? 0)}
+        className="relative flex h-7 w-full touch-none select-none items-center"
+      >
+        <Slider.Track className="relative h-px grow border-t border-[#111] bg-[#111]">
+          <Slider.Range className="absolute h-px bg-[#111]" />
+        </Slider.Track>
+        <Slider.Thumb className="block h-5 w-5 border border-[#111] bg-white shadow-[2px_2px_0_#111] outline-none transition hover:bg-[#111] focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-2" />
+      </Slider.Root>
+      <div className="mt-2 flex justify-between gap-2 text-[10px] font-medium leading-4 text-[#555]">
+        {tickLabels.map((tick) => (
+          <span key={tick} className="max-w-16 text-center">
+            {tick}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }

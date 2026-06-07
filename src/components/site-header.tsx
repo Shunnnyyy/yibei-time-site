@@ -34,6 +34,12 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
           <Link className="transition hover:opacity-60" href={withLocale("/stories", locale)}>
             {copy.navStories}
           </Link>
+          <Link
+            className="transition hover:opacity-60"
+            href={withLocale("/coffee-finder", locale)}
+          >
+            {copy.navCoffee}
+          </Link>
           <Link className="transition hover:opacity-60" href={withLocale("/#booking", locale)}>
             {copy.navBooking}
           </Link>
