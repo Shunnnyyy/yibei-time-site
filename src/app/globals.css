@@ -48,3 +48,63 @@ textarea {
   background-image: radial-gradient(rgba(17, 17, 17, 0.22) 1px, transparent 1px);
   background-size: 18px 18px;
 }
+
+.coffee-range {
+  height: 24px;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.coffee-range:focus {
+  outline: none;
+}
+
+.coffee-range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+
+.coffee-range:focus-visible::-moz-range-thumb {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+
+.coffee-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border: 1px solid #111111;
+  background: #ffffff;
+}
+
+.coffee-range::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+  margin-top: -10px;
+  appearance: none;
+  border: 1px solid #111111;
+  background: #111111;
+  transition: transform 160ms ease;
+}
+
+.coffee-range:hover::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+
+.coffee-range::-moz-range-track {
+  height: 4px;
+  border: 1px solid #111111;
+  background: #ffffff;
+}
+
+.coffee-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #111111;
+  border-radius: 0;
+  background: #111111;
+  transition: transform 160ms ease;
+}
+
+.coffee-range:hover::-moz-range-thumb {
+  transform: scale(1.08);
+}

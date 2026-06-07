@@ -44,6 +44,21 @@ export type Story = {
   body: Record<Locale, string[]>;
 };
 
+export type CoffeeMethod = "all" | "pourover" | "espresso" | "coldbrew";
+
+export type CoffeeProfile = {
+  id: string;
+  name: LocalizedText;
+  roast: 1 | 2 | 3;
+  acid: 1 | 2 | 3;
+  method: Exclude<CoffeeMethod, "all">;
+  flavor: LocalizedText;
+  description: LocalizedText;
+  storySlug: string;
+  image: string;
+  imageAlt: LocalizedText;
+};
+
 export const locales: Locale[] = ["zh", "en"];
 
 export const siteCopy = {
@@ -59,6 +74,9 @@ export const siteCopy = {
     heroNoteBody:
       "你可以选择拍摄、录音，或者只留下文字。信息会通过邮件发给我确认。",
     windowsTitle: "时间和地点",
+    coffeeFinderTitle: "找到适合你的一杯",
+    coffeeFinderBody:
+      "像选择一把椅子一样选择咖啡。调整烘焙、酸度和冲煮方式，找到最适合今天心情的文章入口。",
     storiesTitle: "最近的故事",
     storiesBody: "真实聊天后会更新文章。现在先放项目笔记和路线计划。",
     readAll: "阅读全部",
@@ -86,6 +104,9 @@ export const siteCopy = {
     heroNoteBody:
       "You can choose filming, audio, video, or text. The booking details will be emailed to me.",
     windowsTitle: "Time and place",
+    coffeeFinderTitle: "Find your cup",
+    coffeeFinderBody:
+      "Choose coffee like choosing a chair. Adjust roast, acidity, and brew method to find the story that fits today.",
     storiesTitle: "Recent stories",
     storiesBody:
       "Real stories will come after the chats. For now, these are project notes and route plans.",
@@ -103,6 +124,174 @@ export const siteCopy = {
     backToStories: "Back to stories",
   },
 };
+
+export const coffeeFinderCopy = {
+  zh: {
+    panelTitle: "咖啡选配器",
+    panelBody: "调整三个选项，右侧会实时推荐一篇咖啡文章。",
+    roast: "烘焙程度",
+    acid: "期望酸度",
+    method: "冲煮方式",
+    roastLabels: ["浅烘", "中烘", "深烘"],
+    acidLabels: ["低酸", "明亮", "高酸"],
+    methods: {
+      all: "全部",
+      pourover: "手冲滤杯",
+      espresso: "意式浓缩",
+      coldbrew: "冷萃/冰滴",
+    },
+    resultCount: "个推荐",
+    noResult: "没有找到完全匹配的一杯。可以试着调整滑块。",
+    readStory: "查看文章",
+    bestMatch: "最接近",
+  },
+  en: {
+    panelTitle: "Coffee finder",
+    panelBody: "Move three controls. The right side recommends coffee stories in real time.",
+    roast: "Roast",
+    acid: "Acidity",
+    method: "Brew method",
+    roastLabels: ["Light", "Medium", "Dark"],
+    acidLabels: ["Low", "Bright", "High"],
+    methods: {
+      all: "All",
+      pourover: "Pour-over",
+      espresso: "Espresso",
+      coldbrew: "Cold brew",
+    },
+    resultCount: "recommendations",
+    noResult: "No perfect match yet. Try moving the sliders.",
+    readStory: "Read article",
+    bestMatch: "Best match",
+  },
+} satisfies Record<
+  Locale,
+  {
+    panelTitle: string;
+    panelBody: string;
+    roast: string;
+    acid: string;
+    method: string;
+    roastLabels: string[];
+    acidLabels: string[];
+    methods: Record<CoffeeMethod, string>;
+    resultCount: string;
+    noResult: string;
+    readStory: string;
+    bestMatch: string;
+  }
+>;
+
+export const coffeeProfiles: CoffeeProfile[] = [
+  {
+    id: "yirgacheffe",
+    name: { zh: "埃塞俄比亚 耶加雪菲", en: "Ethiopia Yirgacheffe" },
+    roast: 1,
+    acid: 3,
+    method: "pourover",
+    flavor: { zh: "柑橘 / 茉莉 / 清亮", en: "Citrus / jasmine / clean" },
+    description: {
+      zh: "适合喜欢轻盈、花香和明亮酸感的人。它像一个很容易开始的下午聊天。",
+      en: "For people who like light body, floral notes, and bright acidity. It feels like an easy afternoon talk.",
+    },
+    storySlug: "why-one-cup",
+    image: "/images/story-online.jpg",
+    imageAlt: {
+      zh: "桌面上的咖啡、笔记本和电脑",
+      en: "Coffee, notebook, and laptop on a desk",
+    },
+  },
+  {
+    id: "colombia-huila",
+    name: { zh: "哥伦比亚 蕙兰", en: "Colombia Huila" },
+    roast: 2,
+    acid: 2,
+    method: "pourover",
+    flavor: { zh: "坚果 / 巧克力 / 平衡", en: "Nutty / chocolate / balanced" },
+    description: {
+      zh: "适合第一次不知道怎么选的人。甜感和酸感都比较温和，像日常但不无聊的对话。",
+      en: "A good first choice. Sweetness and acidity stay gentle, like a daily conversation that is not boring.",
+    },
+    storySlug: "fuzhou-summer-route",
+    image: "/images/story-fuzhou.jpg",
+    imageAlt: {
+      zh: "福州街道和城市建筑",
+      en: "A Fuzhou street and city buildings",
+    },
+  },
+  {
+    id: "espresso-blend",
+    name: { zh: "经典意式拼配", en: "Classic espresso blend" },
+    roast: 3,
+    acid: 1,
+    method: "espresso",
+    flavor: { zh: "可可 / 奶香 / 浓郁", en: "Cocoa / milk / rich" },
+    description: {
+      zh: "适合喜欢低酸、厚重和拿铁口感的人。它比较直接，也很适合短短的一杯时间。",
+      en: "For people who like low acidity, heavy body, and latte texture. It is direct and works well for one short cup.",
+    },
+    storySlug: "toronto-online",
+    image: "/images/coffee-hero.jpg",
+    imageAlt: {
+      zh: "窗边热咖啡照片",
+      en: "Hot coffee by a window",
+    },
+  },
+  {
+    id: "kenya-aa",
+    name: { zh: "肯尼亚 AA", en: "Kenya AA" },
+    roast: 1,
+    acid: 3,
+    method: "coldbrew",
+    flavor: { zh: "乌梅 / 黑加仑 / 清爽", en: "Plum / blackcurrant / fresh" },
+    description: {
+      zh: "适合想要冰一点、果汁感强一点的人。冷萃后会更顺口，也更适合夏天。",
+      en: "For people who want something cold and fruity. Cold brew makes it smoother and very summer-friendly.",
+    },
+    storySlug: "why-one-cup",
+    image: "/images/story-online.jpg",
+    imageAlt: {
+      zh: "桌面上的咖啡、笔记本和电脑",
+      en: "Coffee, notebook, and laptop on a desk",
+    },
+  },
+  {
+    id: "mandheling",
+    name: { zh: "曼特宁 G1", en: "Mandheling G1" },
+    roast: 3,
+    acid: 1,
+    method: "pourover",
+    flavor: { zh: "木质 / 草本 / 醇厚", en: "Woody / herbal / full" },
+    description: {
+      zh: "适合不喜欢酸味的人。它更沉稳，适合慢慢聊家乡、生活和最近的烦恼。",
+      en: "For people who do not like sour coffee. It feels calm and suits slower talks about home and life.",
+    },
+    storySlug: "fuzhou-summer-route",
+    image: "/images/story-fuzhou.jpg",
+    imageAlt: {
+      zh: "福州街道和城市建筑",
+      en: "A Fuzhou street and city buildings",
+    },
+  },
+  {
+    id: "toronto-cold-cup",
+    name: { zh: "多伦多夏日冷杯", en: "Toronto summer cold cup" },
+    roast: 2,
+    acid: 2,
+    method: "coldbrew",
+    flavor: { zh: "焦糖 / 冰感 / 干净", en: "Caramel / cold / clean" },
+    description: {
+      zh: "适合线上或多伦多的夏天。风味不太尖锐，适合边散步边聊。",
+      en: "Good for online chats or a Toronto summer. It is not too sharp, nice for walking and talking.",
+    },
+    storySlug: "toronto-online",
+    image: "/images/story-toronto.jpg",
+    imageAlt: {
+      zh: "多伦多湖边城市天际线",
+      en: "Toronto skyline near the waterfront",
+    },
+  },
+];
 
 export const bookingCopy = {
   zh: {

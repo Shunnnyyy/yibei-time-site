@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Globe2, Mail, MapPin } from "lucide-react";
 import { BookingForm } from "@/components/booking-form";
+import { CoffeeFinder } from "@/components/coffee-finder";
 import { SiteHeader } from "@/components/site-header";
 import { StoryPreview } from "@/components/story-preview";
 import {
@@ -85,6 +86,21 @@ export default async function Home({ searchParams }: HomeProps) {
             );
           })}
         </div>
+      </section>
+
+      <section
+        id="coffee-finder"
+        className="mx-auto max-w-7xl border-x border-[#111] px-5 py-14 sm:px-8"
+      >
+        <div className="mb-8 max-w-3xl">
+          <h2 className="text-3xl font-semibold leading-10 text-[#111]">
+            {copy.coffeeFinderTitle}
+          </h2>
+          <p className="mt-2 text-base leading-7 text-[#333]">
+            {copy.coffeeFinderBody}
+          </p>
+        </div>
+        <CoffeeFinder locale={locale} />
       </section>
 
       <section
