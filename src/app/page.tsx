@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Globe2, Mail, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BookingForm } from "@/components/booking-form";
+import { CoffeeIcon } from "@/components/coffee-icons";
 import { SiteHeader } from "@/components/site-header";
 import { StoryPreview } from "@/components/story-preview";
 import {
+  coffeeProfiles,
   coffeeFinderCopy,
   getLocale,
   siteCopy,
   stories,
-  summerWindows,
   withLocale,
 } from "@/lib/content";
 
@@ -62,38 +63,11 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
-      <section className="border-y border-[#111] bg-white">
-        <div className="dot-bg mx-auto grid max-w-7xl grid-cols-1 gap-4 border-x border-[#111] px-5 py-8 sm:px-8 md:grid-cols-3">
-          {summerWindows.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={item.title[locale]}
-                className="flex items-start gap-4 border border-[#111] bg-white p-5"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#111] bg-white text-[#111]">
-                  <Icon className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <h2 className="text-base font-semibold text-[#111]">
-                    {item.title[locale]}
-                  </h2>
-                  <p className="mt-1 text-sm leading-6 text-[#333]">
-                    {item.detail[locale]}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
       <section
         id="coffee-finder"
-        className="mx-auto max-w-7xl border-x border-[#111] px-5 py-14 sm:px-8"
+        className="dot-bg border-y border-[#111] bg-white"
       >
-        <div className="grid-bg grid grid-cols-1 gap-8 border border-[#111] bg-white p-5 sm:p-8 lg:grid-cols-[0.85fr_1fr] lg:items-center">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 border-x border-[#111] px-5 py-14 sm:px-8 lg:grid-cols-[0.85fr_1fr] lg:items-center">
           <div className="max-w-2xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
               {finderCopy.eyebrow}
@@ -113,21 +87,23 @@ export default async function Home({ searchParams }: HomeProps) {
             </Link>
           </div>
           <div className="relative min-h-[230px] overflow-hidden border border-[#111] bg-white">
-            <div className="pointer-events-none absolute inset-0 dot-bg opacity-20" />
-            {["Y", "H", "E", "K", "M", "T"].map((mark, index) => (
+            <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
+            {coffeeProfiles.map((profile, index) => (
               <span
-                key={mark}
-                className="absolute flex items-center justify-center rounded-full border border-[#111] bg-white font-semibold text-[#111] shadow-[0_16px_28px_rgba(0,0,0,0.08)]"
+                key={profile.id}
+                className="absolute flex items-center justify-center rounded-full border border-[#111] bg-white text-[#111] shadow-[0_16px_28px_rgba(0,0,0,0.08)]"
                 style={{
                   width: index % 2 === 0 ? 82 : 62,
                   height: index % 2 === 0 ? 82 : 62,
                   left: `${12 + index * 14}%`,
                   top: `${index % 2 === 0 ? 24 : 55}%`,
                   transform: `translate(-50%, -50%) rotate(${index % 2 === 0 ? -6 : 8}deg)`,
-                  fontSize: index % 2 === 0 ? 30 : 24,
                 }}
               >
-                {mark}
+                <CoffeeIcon
+                  id={profile.icon}
+                  className={index % 2 === 0 ? "h-11 w-11" : "h-8 w-8"}
+                />
               </span>
             ))}
           </div>
@@ -156,40 +132,6 @@ export default async function Home({ searchParams }: HomeProps) {
           </Link>
         </div>
         <StoryPreview stories={stories} locale={locale} />
-      </section>
-
-      <section id="about" className="border-t border-[#111] bg-white">
-        <div className="grid-bg mx-auto grid max-w-7xl grid-cols-1 gap-8 border-x border-[#111] px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1fr]">
-          <div>
-            <h2 className="text-3xl font-semibold leading-10 text-[#111]">
-              {copy.aboutTitle}
-            </h2>
-          </div>
-          <div className="space-y-5 text-base leading-8 text-[#333]">
-            <p>{copy.aboutBodyOne}</p>
-            <p>{copy.aboutBodyTwo}</p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="border border-[#111] bg-white p-4">
-                <MapPin className="mb-3 h-5 w-5 text-[#111]" aria-hidden />
-                <p className="text-sm font-semibold text-[#111]">
-                  {locale === "zh" ? "福州 / 多伦多" : "Fuzhou / Toronto"}
-                </p>
-              </div>
-              <div className="border border-[#111] bg-white p-4">
-                <Globe2 className="mb-3 h-5 w-5 text-[#111]" aria-hidden />
-                <p className="text-sm font-semibold text-[#111]">
-                  {locale === "zh" ? "线上也可以" : "Online is okay"}
-                </p>
-              </div>
-              <div className="border border-[#111] bg-white p-4">
-                <Mail className="mb-3 h-5 w-5 text-[#111]" aria-hidden />
-                <p className="text-sm font-semibold text-[#111]">
-                  {locale === "zh" ? "邮件确认预约" : "Email confirmation"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <footer className="border-t border-[#111] bg-white">

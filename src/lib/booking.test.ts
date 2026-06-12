@@ -6,14 +6,14 @@ import {
 } from "./booking";
 
 describe("booking validation", () => {
-  test("accepts a Toronto online video booking and converts to Fuzhou time", () => {
+  test("accepts a Toronto online booking and converts to Fuzhou time", () => {
     const payload = {
       email: "guest@example.com",
       location: "online",
       timezone: "America/Toronto",
       date: "2026-06-15",
-      time: "15:30",
-      format: "online_video",
+      time: "16:00",
+      format: "online",
       note: "I want to talk about summer plans.",
       locale: "zh",
       company: "",
@@ -25,7 +25,7 @@ describe("booking validation", () => {
     if (!result.ok) {
       throw new Error("Expected valid booking");
     }
-    expect(result.booking.startsAtUtc).toBe("2026-06-15T19:30:00.000Z");
+    expect(result.booking.startsAtUtc).toBe("2026-06-15T20:00:00.000Z");
     expect(result.booking.displayTimes.primary).toContain("Toronto");
     expect(result.booking.displayTimes.secondary).toContain("福州");
     expect(result.booking.displayTimes.secondary).toContain("2026-06-16");
@@ -37,8 +37,8 @@ describe("booking validation", () => {
       location: "fuzhou",
       timezone: "Asia/Shanghai",
       date: "2026-06-15",
-      time: "15:30",
-      format: "offline_text",
+      time: "14:00",
+      format: "offline",
       note: "",
       locale: "zh",
       company: "bot text",
@@ -61,9 +61,9 @@ describe("booking email", () => {
       location: "fuzhou",
       timezone: "Asia/Shanghai",
       date: "2026-06-15",
-      time: "15:30",
-      format: "offline_audio",
-      note: "I prefer audio only.",
+      time: "14:00",
+      format: "offline",
+      note: "I prefer to meet in a quiet place.",
       locale: "en",
       company: "",
     });
@@ -76,9 +76,9 @@ describe("booking email", () => {
     const email = buildBookingEmail(result.booking);
     expect(email.subject).toContain("一杯时间");
     expect(email.text).toContain("guest@example.com");
-    expect(email.text).toContain("offline_audio");
+    expect(email.text).toContain("offline");
     expect(email.text).toContain("Asia/Shanghai");
-    expect(email.html).toContain("I prefer audio only.");
+    expect(email.html).toContain("I prefer to meet in a quiet place.");
     expect(email.html).not.toContain("RESEND_API_KEY");
   });
 });

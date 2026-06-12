@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 import { coffeeProfiles, stories } from "./content";
 
 describe("coffee finder content", () => {
-  const timeBands = ["morning", "afternoon", "evening", "anytime"];
+  const timeBands = [
+    "08:00",
+    "10:00",
+    "12:00",
+    "14:00",
+    "16:00",
+    "18:00",
+    "20:00",
+    "22:00",
+    "anytime",
+  ];
   const ageBands = ["teen", "student", "young_adult", "adult", "open"];
   const sizes = ["sm", "md", "lg"];
 
@@ -18,6 +28,7 @@ describe("coffee finder content", () => {
     for (const profile of coffeeProfiles) {
       expect(profile.name.zh).toBeTruthy();
       expect(profile.name.en).toBeTruthy();
+      expect(profile.icon).toBeTruthy();
       expect(profile.description.zh).toBeTruthy();
       expect(profile.description.en).toBeTruthy();
     }

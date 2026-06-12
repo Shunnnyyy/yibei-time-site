@@ -53,8 +53,8 @@ const defaultBooking: BookingDraft = {
   location: "fuzhou",
   timezone: "Asia/Shanghai",
   date: "2026-06-15",
-  time: "15:30",
-  format: "offline_text",
+  time: "14:00",
+  format: "offline",
   note: "",
   company: "",
 };
@@ -104,7 +104,7 @@ export function BookingForm({ locale }: BookingFormProps) {
     updateBooking({
       location,
       timezone,
-      format: location === "online" ? "online_video" : "offline_text",
+      format: location === "online" ? "online" : "offline",
     });
   }
 
@@ -251,7 +251,7 @@ export function BookingForm({ locale }: BookingFormProps) {
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium text-[#111]">{copy.format}</legend>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {conversationFormats.map((option) => {
             const Icon = option.icon;
             const isSelected = booking.format === option.id;

@@ -30,6 +30,19 @@ npm run dev
 
 Open <http://localhost:3000>.
 
+## Add Your Stories
+
+The easiest content system is the JSON file at `src/content/stories.json`.
+
+To add a new blog story:
+
+1. Copy one existing story object in `src/content/stories.json`.
+2. Change `slug`, `title`, `date`, `city`, `summary`, `image`, `imageAlt`, and `body`.
+3. Use the same `slug` in `src/lib/content.ts` if you want one coffee icon in `/coffee-finder` to open that story.
+4. Run `npm run build` before deploying.
+
+This keeps the site simple. You do not need a database yet, and your stories are still easy to edit and push to GitHub.
+
 ## Email Setup
 
 Create `.env.local` from `.env.example`:

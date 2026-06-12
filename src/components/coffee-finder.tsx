@@ -5,6 +5,7 @@ import { ArrowLeft, BookOpen, Sparkle } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import * as Slider from "@radix-ui/react-slider";
 import { useMemo, useState } from "react";
+import { CoffeeIcon } from "@/components/coffee-icons";
 import {
   coffeeFinderCopy,
   coffeeProfiles,
@@ -20,9 +21,14 @@ type CoffeeFinderProps = {
 };
 
 const timeBands: CoffeeTimeBand[] = [
-  "morning",
-  "afternoon",
-  "evening",
+  "08:00",
+  "10:00",
+  "12:00",
+  "14:00",
+  "16:00",
+  "18:00",
+  "20:00",
+  "22:00",
   "anytime",
 ];
 
@@ -67,10 +73,10 @@ function scoreCoffee(
 export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   const copy = coffeeFinderCopy[locale];
   const prefersReducedMotion = useReducedMotion();
-  const [timeIndex, setTimeIndex] = useState(1);
+  const [timeIndex, setTimeIndex] = useState(3);
   const [ageIndex, setAgeIndex] = useState(1);
 
-  const selectedTime = timeBands[timeIndex] ?? "afternoon";
+  const selectedTime = timeBands[timeIndex] ?? "14:00";
   const selectedAge = ageBands[ageIndex] ?? "student";
 
   const rankedProfiles = useMemo(() => {
@@ -238,7 +244,6 @@ function CoffeeMark({
           style={{
             width: visualSize,
             height: visualSize,
-            fontSize: Math.round(visualSize * 0.4),
           }}
           animate={{
             y: [0, floatY, 0],
@@ -256,7 +261,7 @@ function CoffeeMark({
           }}
         >
           <span className="absolute -bottom-2 h-3 w-2/3 rounded-[50%] bg-black/10 blur-[2px]" />
-          <span className="relative">{profile.mark}</span>
+          <CoffeeIcon id={profile.icon} className="relative h-[54%] w-[54%]" />
         </motion.span>
 
         <span className="mt-3 max-w-[13rem] border border-[#111] bg-white px-3 py-2 text-xs font-semibold leading-5 text-[#111] opacity-0 shadow-[3px_3px_0_#111] transition group-hover:opacity-100 group-focus-visible:opacity-100">
@@ -290,7 +295,7 @@ function CoffeeDial({
   onAgeChange,
 }: CoffeeDialProps) {
   const copy = coffeeFinderCopy[locale];
-  const selectedTime = timeBands[timeIndex] ?? "afternoon";
+  const selectedTime = timeBands[timeIndex] ?? "14:00";
   const selectedAge = ageBands[ageIndex] ?? "student";
 
   return (
@@ -302,8 +307,8 @@ function CoffeeDial({
           animate={{ rotate: dialRotation }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         />
-        <div className="absolute left-1/2 top-4 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-[#111] bg-white text-xs font-semibold shadow-[3px_3px_0_#111]">
-          {activeProfile.mark}
+        <div className="absolute left-1/2 top-4 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-[#111] bg-white text-[#111] shadow-[3px_3px_0_#111]">
+          <CoffeeIcon id={activeProfile.icon} className="h-7 w-7" />
         </div>
       </div>
 

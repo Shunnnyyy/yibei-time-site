@@ -3,12 +3,7 @@ import { DateTime } from "luxon";
 export type Locale = "zh" | "en";
 export type LocationId = "fuzhou" | "toronto" | "online";
 export type TimeZoneId = "Asia/Shanghai" | "America/Toronto";
-export type ConversationFormat =
-  | "offline_filming"
-  | "offline_text"
-  | "offline_audio"
-  | "online_video"
-  | "online_text";
+export type ConversationFormat = "offline" | "online";
 
 export type BookingRequest = {
   email: string;
@@ -41,13 +36,7 @@ type NormalizeResult =
 
 const locations: LocationId[] = ["fuzhou", "toronto", "online"];
 const timeZones: TimeZoneId[] = ["Asia/Shanghai", "America/Toronto"];
-const formats: ConversationFormat[] = [
-  "offline_filming",
-  "offline_text",
-  "offline_audio",
-  "online_video",
-  "online_text",
-];
+const formats: ConversationFormat[] = ["offline", "online"];
 const locales: Locale[] = ["zh", "en"];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

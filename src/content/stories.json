@@ -1,0 +1,113 @@
+[
+  {
+    "slug": "why-one-cup",
+    "title": {
+      "zh": "开篇：为什么只聊一杯咖啡",
+      "en": "Why only one cup of coffee"
+    },
+    "date": "2026-06-06",
+    "city": {
+      "zh": "计划笔记",
+      "en": "Project note"
+    },
+    "status": {
+      "zh": "准备中",
+      "en": "Preparing"
+    },
+    "summary": {
+      "zh": "一杯咖啡给对话一个边界，也让陌生人更容易开始。",
+      "en": "One cup gives the conversation a clear edge and makes it easier to start."
+    },
+    "image": "/images/story-online.jpg",
+    "imageAlt": {
+      "zh": "桌面上的咖啡、笔记本和电脑",
+      "en": "Coffee, notebook, and laptop on a desk"
+    },
+    "body": {
+      "zh": [
+        "这个博客从一个很简单的想法开始：我想在暑假和不同的陌生人聊一会儿。时间不用很长，一杯咖啡就够了。",
+        "这个边界很重要。咖啡喝完，聊天也结束。这样双方都不用有太多压力，也不用把一次见面变得很正式。",
+        "有些聊天会录视频，有些只录声音，有些我只会写成文字。每个人可以选自己舒服的方式。"
+      ],
+      "en": [
+        "This blog starts with a simple idea. I want to talk with different strangers during summer. It does not have to be long. One coffee is enough.",
+        "The boundary matters. When the coffee ends, the chat ends too. It makes the meeting feel lighter.",
+        "Some chats can be filmed, some can be audio only, and some can be text only. People can choose what feels comfortable."
+      ]
+    }
+  },
+  {
+    "slug": "fuzhou-summer-route",
+    "title": {
+      "zh": "福州：老街和慢慢聊的下午",
+      "en": "Fuzhou: old streets and slow afternoons"
+    },
+    "date": "2026-06-06",
+    "city": {
+      "zh": "福州",
+      "en": "Fuzhou"
+    },
+    "status": {
+      "zh": "路线计划",
+      "en": "Route plan"
+    },
+    "summary": {
+      "zh": "福州的线下聊天会选比较安静、好找、适合短谈的地方。",
+      "en": "For Fuzhou, I will choose quiet, easy-to-find places for short chats."
+    },
+    "image": "/images/story-fuzhou.jpg",
+    "imageAlt": {
+      "zh": "福州街道和城市建筑",
+      "en": "A Fuzhou street and city buildings"
+    },
+    "body": {
+      "zh": [
+        "福州的见面地点会尽量简单：好找、安全、环境不太吵。三坊七巷附近、学校附近、或安静咖啡店都可以。",
+        "我不想把聊天做成采访。更像是两个人坐下来，聊生活、学习、工作、家乡，或者最近正在烦恼的事情。",
+        "如果对方愿意，我会把聊天整理成一篇短文。文章会保护隐私，不写真实姓名，也不写太具体的个人信息。"
+      ],
+      "en": [
+        "For Fuzhou, the meeting place should be simple: easy to find, safe, and not too loud.",
+        "I do not want the chat to feel like an interview. It is more like two people sitting down and talking about life.",
+        "If the other person is comfortable, I will turn the chat into a short story. I will protect privacy."
+      ]
+    }
+  },
+  {
+    "slug": "toronto-online",
+    "title": {
+      "zh": "多伦多和线上，也可以很自然",
+      "en": "Toronto and online can also feel natural"
+    },
+    "date": "2026-06-06",
+    "city": {
+      "zh": "多伦多 / 线上",
+      "en": "Toronto / Online"
+    },
+    "status": {
+      "zh": "开放预约",
+      "en": "Open"
+    },
+    "summary": {
+      "zh": "不在同一座城市也没关系，视频、声音、文字都可以有温度。",
+      "en": "It is okay if we are not in the same city. Video, audio, and text can still feel warm."
+    },
+    "image": "/images/story-toronto.jpg",
+    "imageAlt": {
+      "zh": "多伦多湖边城市天际线",
+      "en": "Toronto skyline near the waterfront"
+    },
+    "body": {
+      "zh": [
+        "多伦多的线下聊天可以在湖边、市中心、校园附近进行。天气好的时候，散步前后的一杯咖啡会很舒服。",
+        "线上聊天也会保留同样的边界：一杯咖啡的时间。可以视频，也可以只用文字。",
+        "我希望这个项目不是很吵的内容。它更像一个安静的记录：一个夏天，很多短短的相遇。"
+      ],
+      "en": [
+        "In Toronto, the chat can happen near the lake, downtown, or close to campus.",
+        "Online chats keep the same boundary: one cup of coffee. It can be video or text.",
+        "I hope this project feels quiet. It is a small record of many short meetings in one summer."
+      ]
+    }
+  }
+]
