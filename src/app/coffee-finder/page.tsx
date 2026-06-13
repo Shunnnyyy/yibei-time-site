@@ -6,7 +6,7 @@ import { getLocale } from "@/lib/content";
 export const metadata: Metadata = {
   title: "咖啡阅读选择器 | 一杯时间",
   description:
-    "一个 Vitra 风格的咖啡阅读选择器，用聊天时间和年龄段找到对应的一杯故事。",
+    "从几个轻轻的问题开始，选一杯咖啡，进入一段故事。",
 };
 
 type CoffeeFinderPageProps = {

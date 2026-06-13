@@ -103,7 +103,7 @@ export const siteCopy = {
       "你可以选择线下或线上。信息会通过邮件发给我确认。",
     coffeeFinderTitle: "找到适合你的一杯",
     coffeeFinderBody:
-      "进入一个像 Vitra 选择器一样的咖啡阅读墙。回答几个问题，系统会给每个咖啡主题计算 match percentage。",
+      "先凭感觉选一选，再从一杯咖啡走进一段故事。每个标志都藏着一种聊天的气味。",
     storiesTitle: "最近的故事",
     storiesBody: "真实聊天后会更新文章。现在先放项目笔记和路线计划。",
     readAll: "阅读全部",
@@ -127,7 +127,7 @@ export const siteCopy = {
       "You can choose in person or online. The booking details will be emailed to me.",
     coffeeFinderTitle: "Find your cup",
     coffeeFinderBody:
-      "Enter a Vitra-style coffee reading wall. Answer a few questions and every coffee theme gets a match percentage.",
+      "Choose by feeling, then enter a story through a cup. Each mark carries a different mood.",
     storiesTitle: "Recent stories",
     storiesBody:
       "Real stories will come after the chats. For now, these are project notes and route plans.",
@@ -143,22 +143,22 @@ export const siteCopy = {
 
 export const coffeeFinderCopy = {
   zh: {
-    eyebrow: "Coffee Finder",
+    eyebrow: "Coffee Notes",
     pageTitle: "选一杯，进入一个故事",
     pageBody:
-      "每个咖啡标志都是一篇博客入口。回答底部问题后，最匹配的咖啡会转到视觉中心并显示百分比。",
-    homeCta: "进入咖啡选择器",
+      "不用想得太认真。点一个标志，或者顺着下面几个小问题，找到今天比较靠近的一杯。",
+    homeCta: "去选一杯",
     allStories: "全部故事",
     backHome: "返回首页",
     openStory: "点击阅读故事",
-    selectedLabel: "当前推荐",
-    helperText: "问题只用于推荐阅读主题，不会保存个人答案。",
-    controlsTitle: "调整阅读线索",
+    selectedLabel: "现在靠近",
+    helperText: "答案只留在这一页，刷新后就会消失。",
+    controlsTitle: "慢慢选",
     timeLabel: "聊天时间",
     ageLabel: "年龄段",
     timeSliderLabel: "选择聊天发生时间",
     ageSliderLabel: "选择聊天者年龄段",
-    dialHint: "开始后，咖啡图标会根据答案分数重新排序。",
+    dialHint: "从一个小问题开始，让这一杯慢慢浮到前面。",
     timeBands: {
       "08:00": "08:00",
       "10:00": "10:00",
@@ -179,22 +179,22 @@ export const coffeeFinderCopy = {
     },
   },
   en: {
-    eyebrow: "Coffee Finder",
+    eyebrow: "Coffee Notes",
     pageTitle: "Pick a cup, enter a story",
     pageBody:
-      "Each coffee mark is a reading path. Answer the bottom questions and the best match moves into focus with a percentage.",
+      "No need to overthink it. Click a mark, or follow a few quiet questions to find a cup for now.",
     homeCta: "Open coffee finder",
     allStories: "All stories",
     backHome: "Back home",
     openStory: "Read story",
-    selectedLabel: "Current match",
-    helperText: "Answers only guide the reading match and are not saved.",
-    controlsTitle: "Adjust reading clues",
+    selectedLabel: "Closest now",
+    helperText: "Answers stay on this page and disappear after refresh.",
+    controlsTitle: "Choose slowly",
     timeLabel: "Chat time",
     ageLabel: "Age range",
     timeSliderLabel: "Choose the chat time",
     ageSliderLabel: "Choose the person age range",
-    dialHint: "After you start, coffee icons reorder by answer scores.",
+    dialHint: "Start with a small question and let one cup drift forward.",
     timeBands: {
       "08:00": "08:00",
       "10:00": "10:00",
