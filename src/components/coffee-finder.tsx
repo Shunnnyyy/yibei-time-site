@@ -1,44 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Sparkle } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, RotateCcw, Sparkle } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import * as Slider from "@radix-ui/react-slider";
 import { useMemo, useState } from "react";
 import { CoffeeIcon } from "@/components/coffee-icons";
 import {
   coffeeFinderCopy,
   coffeeProfiles,
   withLocale,
-  type CoffeeAgeBand,
   type CoffeeProfile,
-  type CoffeeTimeBand,
 } from "@/lib/content";
 import type { Locale } from "@/lib/booking";
 
 type CoffeeFinderProps = {
   locale: Locale;
 };
-
-const timeBands: CoffeeTimeBand[] = [
-  "08:00",
-  "10:00",
-  "12:00",
-  "14:00",
-  "16:00",
-  "18:00",
-  "20:00",
-  "22:00",
-  "anytime",
-];
-
-const ageBands: CoffeeAgeBand[] = [
-  "teen",
-  "student",
-  "young_adult",
-  "adult",
-  "open",
-];
 
 const orbitSlots = [
   { x: 50, y: 51 },
@@ -55,45 +32,199 @@ const baseSizes = {
   lg: 132,
 } satisfies Record<CoffeeProfile["baseSize"], number>;
 
-function scoreCoffee(
-  profile: CoffeeProfile,
-  timeBand: CoffeeTimeBand,
-  ageBand: CoffeeAgeBand,
-) {
+type QuestionId = "chat-time" | "flavor" | "pace" | "place";
+type AnswerId =
+  | "morning"
+  | "afternoon"
+  | "evening"
+  | "anytime"
+  | "fruit"
+  | "balanced"
+  | "deep"
+  | "quick"
+  | "slow"
+  | "quiet"
+  | "fuzhou"
+  | "toronto"
+  | "online"
+  | "open";
+type UserAnswers = Partial<Record<QuestionId, AnswerId>>;
+
+type FinderQuestion = {
+  id: QuestionId;
+  title: Record<Locale, string>;
+  hint: Record<Locale, string>;
+  answers: Array<{
+    id: AnswerId;
+    label: Record<Locale, string>;
+  }>;
+};
+
+type QuestionScoreMap = Record<QuestionId, Partial<Record<AnswerId, number>>>;
+
+const questions: FinderQuestion[] = [
+  {
+    id: "chat-time",
+    title: {
+      zh: "你想从什么时间感开始读？",
+      en: "What time mood do you want?",
+    },
+    hint: {
+      zh: "像 Vitra 选择椅子一样，先选一个阅读状态。",
+      en: "Like choosing a chair, start with the reading mood.",
+    },
+    answers: [
+      { id: "morning", label: { zh: "早晨清醒", en: "Morning" } },
+      { id: "afternoon", label: { zh: "下午慢聊", en: "Afternoon" } },
+      { id: "evening", label: { zh: "夜晚安静", en: "Evening" } },
+      { id: "anytime", label: { zh: "都可以", en: "Anytime" } },
+    ],
+  },
+  {
+    id: "flavor",
+    title: {
+      zh: "你更想靠近哪种味道？",
+      en: "Which taste feels closer?",
+    },
+    hint: {
+      zh: "这里的味道也是文章气质，不只是咖啡风味。",
+      en: "Taste also means the feeling of the story.",
+    },
+    answers: [
+      { id: "fruit", label: { zh: "花果明亮", en: "Fruit" } },
+      { id: "balanced", label: { zh: "平衡温和", en: "Balanced" } },
+      { id: "deep", label: { zh: "低酸深一点", en: "Deep" } },
+    ],
+  },
+  {
+    id: "pace",
+    title: {
+      zh: "你现在想要哪种阅读节奏？",
+      en: "What reading pace do you want?",
+    },
+    hint: {
+      zh: "答案会改变每个咖啡主题的匹配分数。",
+      en: "Your answer changes every coffee match score.",
+    },
+    answers: [
+      { id: "quick", label: { zh: "短而直接", en: "Quick" } },
+      { id: "slow", label: { zh: "慢慢展开", en: "Slow" } },
+      { id: "quiet", label: { zh: "安静细腻", en: "Quiet" } },
+    ],
+  },
+  {
+    id: "place",
+    title: {
+      zh: "你想从哪里开始？",
+      en: "Where do you want to start?",
+    },
+    hint: {
+      zh: "可以选城市，也可以只选线上或开放答案。",
+      en: "Choose a city, online, or keep it open.",
+    },
+    answers: [
+      { id: "fuzhou", label: { zh: "福州", en: "Fuzhou" } },
+      { id: "toronto", label: { zh: "多伦多", en: "Toronto" } },
+      { id: "online", label: { zh: "线上", en: "Online" } },
+      { id: "open", label: { zh: "都可以", en: "Open" } },
+    ],
+  },
+];
+
+const coffeeQuestionScores: Record<string, QuestionScoreMap> = {
+  yirgacheffe: {
+    "chat-time": { afternoon: 100, morning: 72, anytime: 84, evening: 52 },
+    flavor: { fruit: 100, balanced: 76, deep: 42 },
+    pace: { quiet: 92, slow: 82, quick: 58 },
+    place: { online: 86, open: 82, fuzhou: 64, toronto: 58 },
+  },
+  "colombia-huila": {
+    "chat-time": { afternoon: 96, anytime: 88, evening: 66, morning: 55 },
+    flavor: { balanced: 100, deep: 72, fruit: 62 },
+    pace: { slow: 92, quiet: 76, quick: 64 },
+    place: { fuzhou: 100, open: 78, online: 62, toronto: 46 },
+  },
+  "espresso-blend": {
+    "chat-time": { morning: 100, anytime: 72, afternoon: 66, evening: 48 },
+    flavor: { deep: 92, balanced: 82, fruit: 36 },
+    pace: { quick: 100, quiet: 58, slow: 54 },
+    place: { toronto: 86, online: 82, open: 74, fuzhou: 52 },
+  },
+  "kenya-aa": {
+    "chat-time": { morning: 94, afternoon: 78, anytime: 76, evening: 42 },
+    flavor: { fruit: 100, balanced: 68, deep: 28 },
+    pace: { quick: 86, quiet: 76, slow: 60 },
+    place: { open: 84, online: 74, fuzhou: 68, toronto: 58 },
+  },
+  mandheling: {
+    "chat-time": { evening: 100, anytime: 84, afternoon: 62, morning: 32 },
+    flavor: { deep: 100, balanced: 70, fruit: 24 },
+    pace: { slow: 96, quiet: 92, quick: 38 },
+    place: { fuzhou: 86, open: 78, toronto: 56, online: 52 },
+  },
+  "toronto-cold-cup": {
+    "chat-time": { anytime: 100, afternoon: 82, evening: 78, morning: 64 },
+    flavor: { balanced: 92, fruit: 84, deep: 44 },
+    pace: { quiet: 88, quick: 72, slow: 70 },
+    place: { toronto: 100, online: 90, open: 84, fuzhou: 42 },
+  },
+};
+
+function calculateMatch(profile: CoffeeProfile, userAnswers: UserAnswers) {
+  const scores = coffeeQuestionScores[profile.id];
   let score = 0;
+  let maxScore = 0;
 
-  if (profile.timeBand === timeBand) score += 6;
-  if (profile.timeBand === "anytime" || timeBand === "anytime") score += 2;
-  if (profile.ageBand === ageBand) score += 4;
-  if (profile.ageBand === "open" || ageBand === "open") score += 1;
+  for (const question of questions) {
+    const productScores = scores?.[question.id] ?? {};
+    const values = Object.values(productScores);
+    const best = values.length > 0 ? Math.max(...values) : 0;
+    const answer = userAnswers[question.id];
 
-  return score;
+    score += answer ? productScores[answer] ?? 0 : Math.round(best * 0.62);
+    maxScore += best;
+  }
+
+  if (maxScore === 0) return 0;
+  return Math.round((score / maxScore) * 100);
 }
 
 export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   const copy = coffeeFinderCopy[locale];
   const prefersReducedMotion = useReducedMotion();
-  const [timeIndex, setTimeIndex] = useState(3);
-  const [ageIndex, setAgeIndex] = useState(1);
-
-  const selectedTime = timeBands[timeIndex] ?? "14:00";
-  const selectedAge = ageBands[ageIndex] ?? "student";
+  const [isStarted, setIsStarted] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
 
   const rankedProfiles = useMemo(() => {
     return coffeeProfiles
       .map((profile, index) => ({
         profile,
-        score: scoreCoffee(profile, selectedTime, selectedAge),
+        match: calculateMatch(profile, userAnswers),
         index,
       }))
-      .sort((a, b) => b.score - a.score || a.index - b.index);
-  }, [selectedAge, selectedTime]);
+      .sort((a, b) => b.match - a.match || a.index - b.index);
+  }, [userAnswers]);
 
   const activeProfile = rankedProfiles[0]?.profile ?? coffeeProfiles[0];
+  const activeMatch = rankedProfiles[0]?.match ?? 0;
   const activeIndex = coffeeProfiles.findIndex(
     (profile) => profile.id === activeProfile.id,
   );
-  const dialRotation = timeIndex * 18 + ageIndex * 11;
+  const answeredCount = questions.filter((question) => userAnswers[question.id]).length;
+  const dialRotation = activeIndex * 18 + answeredCount * 23;
+
+  function handleAnswer(questionId: QuestionId, answerId: AnswerId) {
+    setIsStarted(true);
+    setUserAnswers((current) => ({ ...current, [questionId]: answerId }));
+    setQuestionIndex((current) => Math.min(current + 1, questions.length - 1));
+  }
+
+  function resetFinder() {
+    setUserAnswers({});
+    setQuestionIndex(0);
+    setIsStarted(false);
+  }
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-white text-[#111]">
@@ -129,23 +260,44 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
               {copy.eyebrow}
             </p>
             <h1 className="mt-2 text-2xl font-semibold leading-tight text-[#111] sm:text-[28px]">
-              {copy.pageTitle}
+              {isStarted ? activeProfile.name[locale] : copy.pageTitle}
             </h1>
-            <p className="mt-2 text-xs leading-5 text-[#333]">{copy.pageBody}</p>
+            <p className="mt-2 text-xs leading-5 text-[#333]">
+              {isStarted ? activeProfile.description[locale] : copy.pageBody}
+            </p>
             <div className="mt-4 grid grid-cols-[54px_1fr] items-center border border-[#111] bg-[#f7f7f7] text-left">
               <div className="flex h-full min-h-16 items-center justify-center border-r border-[#111] bg-white text-[#111]">
                 <CoffeeIcon id={activeProfile.icon} className="h-8 w-8" />
               </div>
               <div className="p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
-                {copy.selectedLabel}
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[#111]">
-                {activeProfile.name[locale]}
-              </p>
-              <p className="mt-1 text-[11px] leading-4 text-[#444]">
-                {activeProfile.flavor[locale]}
-              </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+                      {isStarted
+                        ? locale === "zh"
+                          ? "Match percentage"
+                          : "Match percentage"
+                        : copy.selectedLabel}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#111]">
+                      {isStarted
+                        ? `${activeMatch}% match`
+                        : activeProfile.name[locale]}
+                    </p>
+                  </div>
+                  {!isStarted ? (
+                    <button
+                      type="button"
+                      className="border border-[#111] bg-[#111] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#111]"
+                      onClick={() => setIsStarted(true)}
+                    >
+                      Start
+                    </button>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-[11px] leading-4 text-[#444]">
+                  {activeProfile.flavor[locale]}
+                </p>
               </div>
             </div>
           </motion.div>
@@ -163,7 +315,9 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
                 x: profile.scatter.x,
                 y: profile.scatter.y,
               };
-              const score = scoreCoffee(profile, selectedTime, selectedAge);
+              const match =
+                rankedProfiles.find((item) => item.profile.id === profile.id)
+                  ?.match ?? 0;
 
               return (
                 <CoffeeMark
@@ -171,7 +325,7 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
                   locale={locale}
                   profile={profile}
                   isActive={isActive}
-                  score={score}
+                  match={match}
                   slot={slot}
                   index={index}
                   prefersReducedMotion={Boolean(prefersReducedMotion)}
@@ -181,14 +335,18 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
           </div>
         </div>
 
-        <CoffeeDial
+        <QuestionDeck
           locale={locale}
-          timeIndex={timeIndex}
-          ageIndex={ageIndex}
+          isStarted={isStarted}
+          questionIndex={questionIndex}
+          userAnswers={userAnswers}
           activeProfile={activeProfile}
+          activeMatch={activeMatch}
           dialRotation={dialRotation}
-          onTimeChange={setTimeIndex}
-          onAgeChange={setAgeIndex}
+          onStart={() => setIsStarted(true)}
+          onAnswer={handleAnswer}
+          onBack={() => setQuestionIndex((current) => Math.max(current - 1, 0))}
+          onReset={resetFinder}
         />
       </div>
     </section>
@@ -199,7 +357,7 @@ type CoffeeMarkProps = {
   locale: Locale;
   profile: CoffeeProfile;
   isActive: boolean;
-  score: number;
+  match: number;
   slot: { x: number; y: number };
   index: number;
   prefersReducedMotion: boolean;
@@ -209,7 +367,7 @@ function CoffeeMark({
   locale,
   profile,
   isActive,
-  score,
+  match,
   slot,
   index,
   prefersReducedMotion,
@@ -218,7 +376,7 @@ function CoffeeMark({
   const size = baseSizes[profile.baseSize];
   const activeSize = Math.round(size * 1.2);
   const visualSize = isActive ? activeSize : size;
-  const opacity = isActive ? 1 : score > 0 ? 0.58 : 0.32;
+  const opacity = isActive ? 1 : match > 70 ? 0.68 : 0.36;
   const floatY = prefersReducedMotion ? 0 : isActive ? -5 : index % 2 ? 5 : -4;
 
   return (
@@ -271,6 +429,9 @@ function CoffeeMark({
 
         <span className="mt-3 max-w-[13rem] border border-[#111] bg-white px-3 py-2 text-xs font-semibold leading-5 text-[#111] opacity-0 shadow-[3px_3px_0_#111] transition group-hover:opacity-100 group-focus-visible:opacity-100">
           {profile.name[locale]}
+          <span className="block text-[11px] uppercase tracking-[0.12em] text-[#111]">
+            {match}% match
+          </span>
           <span className="block font-normal text-[#444]">
             {profile.tag[locale]} / {profile.flavor[locale]}
           </span>
@@ -284,28 +445,38 @@ function CoffeeMark({
   );
 }
 
-type CoffeeDialProps = {
+type QuestionDeckProps = {
   locale: Locale;
-  timeIndex: number;
-  ageIndex: number;
+  isStarted: boolean;
+  questionIndex: number;
+  userAnswers: UserAnswers;
   activeProfile: CoffeeProfile;
+  activeMatch: number;
   dialRotation: number;
-  onTimeChange: (value: number) => void;
-  onAgeChange: (value: number) => void;
+  onStart: () => void;
+  onAnswer: (questionId: QuestionId, answerId: AnswerId) => void;
+  onBack: () => void;
+  onReset: () => void;
 };
 
-function CoffeeDial({
+function QuestionDeck({
   locale,
-  timeIndex,
-  ageIndex,
+  isStarted,
+  questionIndex,
+  userAnswers,
   activeProfile,
+  activeMatch,
   dialRotation,
-  onTimeChange,
-  onAgeChange,
-}: CoffeeDialProps) {
+  onStart,
+  onAnswer,
+  onBack,
+  onReset,
+}: QuestionDeckProps) {
   const copy = coffeeFinderCopy[locale];
-  const selectedTime = timeBands[timeIndex] ?? "14:00";
-  const selectedAge = ageBands[ageIndex] ?? "student";
+  const question = questions[questionIndex] ?? questions[0];
+  const selectedAnswer = userAnswers[question.id];
+  const answeredCount = questions.filter((item) => userAnswers[item.id]).length;
+  const progress = Math.round((answeredCount / questions.length) * 100);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#111] bg-white/95 px-5 pb-5 pt-10 shadow-[0_-16px_40px_rgba(0,0,0,0.06)] backdrop-blur sm:px-8">
@@ -322,87 +493,131 @@ function CoffeeDial({
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[0.8fr_1fr_1fr] lg:items-end">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[0.68fr_1.32fr] lg:items-end">
         <div>
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
             <Sparkle className="h-3.5 w-3.5" aria-hidden />
-            {copy.controlsTitle}
+            {isStarted
+              ? locale === "zh"
+                ? "Questionnaire"
+                : "Questionnaire"
+              : copy.controlsTitle}
           </p>
-          <p className="mt-2 text-sm leading-6 text-[#333]">{copy.dialHint}</p>
-          <p className="mt-1 text-xs leading-5 text-[#555]">{copy.helperText}</p>
+          <p className="mt-2 text-sm leading-6 text-[#333]">
+            {isStarted
+              ? locale === "zh"
+                ? `${activeProfile.name[locale]} 现在是 ${activeMatch}% match。`
+                : `${activeProfile.name[locale]} is now a ${activeMatch}% match.`
+              : copy.dialHint}
+          </p>
+          <div className="mt-3 h-1 border border-[#111] bg-white">
+            <div
+              className="h-full bg-[#111] transition-[width]"
+              style={{ width: `${isStarted ? progress : 0}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#555]">
+            {isStarted
+              ? `${String(Math.min(questionIndex + 1, questions.length)).padStart(
+                  2,
+                  "0",
+                )} / ${String(questions.length).padStart(2, "0")}`
+              : copy.helperText}
+          </p>
         </div>
 
-        <DialSlider
-          label={copy.timeLabel}
-          ariaLabel={copy.timeSliderLabel}
-          value={timeIndex}
-          max={timeBands.length - 1}
-          valueLabel={copy.timeBands[selectedTime]}
-          tickLabels={timeBands.map((band) => copy.timeBands[band])}
-          onChange={onTimeChange}
-        />
+        <div className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]">
+          {!isStarted ? (
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+                  {locale === "zh" ? "Product finder logic" : "Product finder logic"}
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-[#111]">
+                  {locale === "zh" ? "回答几个问题，找到一杯" : "Answer, then match a cup"}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[#333]">
+                  {locale === "zh"
+                    ? "每个咖啡图标都有一组答案分数。开始后，图标会根据你的答案重新排序。"
+                    : "Each coffee icon has answer scores. After you start, icons reorder by your answers."}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
+                onClick={onStart}
+              >
+                Start
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+                    {locale === "zh" ? "Question" : "Question"}{" "}
+                    {String(questionIndex + 1).padStart(2, "0")}
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold leading-7 text-[#111]">
+                    {question.title[locale]}
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-[#333]">
+                    {question.hint[locale]}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-xs font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+                  onClick={onReset}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+                  {locale === "zh" ? "重来" : "Reset"}
+                </button>
+              </div>
 
-        <DialSlider
-          label={copy.ageLabel}
-          ariaLabel={copy.ageSliderLabel}
-          value={ageIndex}
-          max={ageBands.length - 1}
-          valueLabel={copy.ageBands[selectedAge]}
-          tickLabels={ageBands.map((band) => copy.ageBands[band])}
-          onChange={onAgeChange}
-        />
-      </div>
-    </div>
-  );
-}
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {question.answers.map((answer) => {
+                  const isSelected = selectedAnswer === answer.id;
 
-type DialSliderProps = {
-  label: string;
-  ariaLabel: string;
-  value: number;
-  max: number;
-  valueLabel: string;
-  tickLabels: string[];
-  onChange: (value: number) => void;
-};
+                  return (
+                    <button
+                      key={answer.id}
+                      type="button"
+                      className={`min-h-12 border px-3 py-2 text-sm font-semibold transition ${
+                        isSelected
+                          ? "border-[#111] bg-[#111] text-white"
+                          : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
+                      }`}
+                      aria-pressed={isSelected}
+                      onClick={() => onAnswer(question.id, answer.id)}
+                    >
+                      {answer.label[locale]}
+                    </button>
+                  );
+                })}
+              </div>
 
-function DialSlider({
-  label,
-  ariaLabel,
-  value,
-  max,
-  valueLabel,
-  tickLabels,
-  onChange,
-}: DialSliderProps) {
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-[#111]">{label}</p>
-        <p className="border border-[#111] bg-white px-2 py-1 text-xs font-semibold text-[#111]">
-          {valueLabel}
-        </p>
-      </div>
-      <Slider.Root
-        aria-label={ariaLabel}
-        value={[value]}
-        min={0}
-        max={max}
-        step={1}
-        onValueChange={(nextValue) => onChange(nextValue[0] ?? 0)}
-        className="relative flex h-7 w-full touch-none select-none items-center"
-      >
-        <Slider.Track className="relative h-px grow border-t border-[#111] bg-[#111]">
-          <Slider.Range className="absolute h-px bg-[#111]" />
-        </Slider.Track>
-        <Slider.Thumb className="block h-5 w-5 border border-[#111] bg-white shadow-[2px_2px_0_#111] outline-none transition hover:bg-[#111] focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-2" />
-      </Slider.Root>
-      <div className="mt-2 flex justify-between gap-2 text-[10px] font-medium leading-4 text-[#555]">
-        {tickLabels.map((tick) => (
-          <span key={tick} className="max-w-16 text-center">
-            {tick}
-          </span>
-        ))}
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  className="border-b border-[#111] text-sm font-semibold text-[#111] disabled:border-transparent disabled:text-[#999]"
+                  disabled={questionIndex === 0}
+                  onClick={onBack}
+                >
+                  ← Back
+                </button>
+                <Link
+                  href={withLocale(`/stories/${activeProfile.storySlug}`, locale)}
+                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+                >
+                  {copy.openStory}
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
