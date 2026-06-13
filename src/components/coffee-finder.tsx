@@ -493,66 +493,47 @@ function QuestionDeck({
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[0.68fr_1.32fr] lg:items-end">
-        <div>
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
-            <Sparkle className="h-3.5 w-3.5" aria-hidden />
-            {isStarted
-              ? locale === "zh"
-                ? "Questionnaire"
-                : "Questionnaire"
-              : copy.controlsTitle}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#333]">
-            {isStarted
-              ? locale === "zh"
-                ? `${activeProfile.name[locale]} 现在是 ${activeMatch}% match。`
-                : `${activeProfile.name[locale]} is now a ${activeMatch}% match.`
-              : copy.dialHint}
-          </p>
-          <div className="mt-3 h-1 border border-[#111] bg-white">
-            <div
-              className="h-full bg-[#111] transition-[width]"
-              style={{ width: `${isStarted ? progress : 0}%` }}
-            />
-          </div>
-          <p className="mt-2 text-xs leading-5 text-[#555]">
-            {isStarted
-              ? `${String(Math.min(questionIndex + 1, questions.length)).padStart(
-                  2,
-                  "0",
-                )} / ${String(questions.length).padStart(2, "0")}`
-              : copy.helperText}
-          </p>
-        </div>
-
-        <div className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]">
-          {!isStarted ? (
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
-                  {locale === "zh" ? "Product finder logic" : "Product finder logic"}
-                </p>
-                <h2 className="mt-1 text-xl font-semibold text-[#111]">
-                  {locale === "zh" ? "回答几个问题，找到一杯" : "Answer, then match a cup"}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-[#333]">
-                  {locale === "zh"
-                    ? "每个咖啡图标都有一组答案分数。开始后，图标会根据你的答案重新排序。"
-                    : "Each coffee icon has answer scores. After you start, icons reorder by your answers."}
-                </p>
+      <div className="mx-auto flex max-w-3xl flex-col gap-3">
+        {!isStarted ? (
+            <motion.div
+              key="start"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]"
+            >
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+                    {locale === "zh" ? "Product finder logic" : "Product finder logic"}
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold text-[#111]">
+                    {locale === "zh" ? "回答几个问题，找到一杯" : "Answer, then match a cup"}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-[#333]">
+                    {locale === "zh"
+                      ? "每个咖啡图标都有一组答案分数。开始后，图标会根据你的答案重新排序。"
+                      : "Each coffee icon has answer scores. After you start, icons reorder by your answers."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
+                  onClick={onStart}
+                >
+                  Start
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </button>
               </div>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
-                onClick={onStart}
-              >
-                Start
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
+            </motion.div>
           ) : (
-            <div>
+            <motion.div
+              key={question.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]"
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
@@ -566,14 +547,14 @@ function QuestionDeck({
                     {question.hint[locale]}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-xs font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
-                  onClick={onReset}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-                  {locale === "zh" ? "重来" : "Reset"}
-                </button>
+                <div className="border border-[#111] bg-[#f7f7f7] px-3 py-2 text-right">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#555]">
+                    Match
+                  </p>
+                  <p className="text-sm font-semibold text-[#111]">
+                    {activeMatch}%
+                  </p>
+                </div>
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -597,8 +578,37 @@ function QuestionDeck({
                   );
                 })}
               </div>
+            </motion.div>
+          )}
 
-              <div className="mt-4 flex items-center justify-between">
+        <div className="border border-[#111] bg-white px-4 py-3 shadow-[3px_3px_0_#111]">
+          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+            <Sparkle className="h-3.5 w-3.5" aria-hidden />
+            {isStarted
+              ? locale === "zh"
+                ? "Questionnaire"
+                : "Questionnaire"
+              : copy.controlsTitle}
+          </p>
+          <div className="mt-3 h-1.5 border border-[#111] bg-white">
+            <div
+              className="h-full bg-[#111] transition-[width] duration-300 ease-out"
+              style={{ width: `${isStarted ? progress : 0}%` }}
+            />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs leading-5 text-[#555]">
+              {isStarted
+                ? `${String(
+                    Math.min(questionIndex + 1, questions.length),
+                  ).padStart(2, "0")} / ${String(questions.length).padStart(
+                    2,
+                    "0",
+                  )} · ${activeProfile.name[locale]} · ${activeMatch}% match`
+                : copy.helperText}
+            </p>
+            <div className="flex items-center gap-3">
+              {isStarted ? (
                 <button
                   type="button"
                   className="border-b border-[#111] text-sm font-semibold text-[#111] disabled:border-transparent disabled:text-[#999]"
@@ -607,6 +617,18 @@ function QuestionDeck({
                 >
                   ← Back
                 </button>
+              ) : null}
+              {isStarted ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-xs font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+                  onClick={onReset}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+                  {locale === "zh" ? "重来" : "Reset"}
+                </button>
+              ) : null}
+              {isStarted ? (
                 <Link
                   href={withLocale(`/stories/${activeProfile.storySlug}`, locale)}
                   className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
@@ -614,9 +636,9 @@ function QuestionDeck({
                   {copy.openStory}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
-              </div>
+              ) : null}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
