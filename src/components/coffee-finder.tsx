@@ -32,6 +32,22 @@ const baseSizes = {
   lg: 132,
 } satisfies Record<CoffeeProfile["baseSize"], number>;
 
+function fluidSlot(
+  slot: { x: number; y: number },
+  orbitIndex: number,
+  activeIndex: number,
+  answeredCount: number,
+  isActive: boolean,
+) {
+  const phase = activeIndex * 0.72 + answeredCount * 1.18 + orbitIndex * 0.91;
+  const pull = isActive ? 0.35 : 1;
+
+  return {
+    x: slot.x + Math.sin(phase) * 3.4 * pull,
+    y: slot.y + Math.cos(phase * 0.83) * 2.6 * pull,
+  };
+}
+
 type QuestionId = "chat-time" | "flavor" | "pace" | "place";
 type AnswerId =
   | "morning"
@@ -230,6 +246,11 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
     <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-white text-[#111]">
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
       <div className="pointer-events-none absolute inset-0 fine-dot-bg opacity-[0.2]" />
+      <FlowField
+        activeIndex={activeIndex}
+        answeredCount={answeredCount}
+        prefersReducedMotion={Boolean(prefersReducedMotion)}
+      />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl flex-col border-x border-[#111] px-5 pb-8 pt-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -317,6 +338,13 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
                 x: profile.scatter.x,
                 y: profile.scatter.y,
               };
+              const fluidPosition = fluidSlot(
+                slot,
+                orbitIndex,
+                activeIndex,
+                answeredCount,
+                isActive,
+              );
               const match =
                 rankedProfiles.find((item) => item.profile.id === profile.id)
                   ?.match ?? 0;
@@ -328,8 +356,10 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
                   profile={profile}
                   isActive={isActive}
                   match={match}
-                  slot={slot}
+                  slot={fluidPosition}
                   index={index}
+                  orbitIndex={orbitIndex}
+                  answeredCount={answeredCount}
                   prefersReducedMotion={Boolean(prefersReducedMotion)}
                 />
               );
@@ -355,6 +385,70 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   );
 }
 
+type FlowFieldProps = {
+  activeIndex: number;
+  answeredCount: number;
+  prefersReducedMotion: boolean;
+};
+
+function FlowField({
+  activeIndex,
+  answeredCount,
+  prefersReducedMotion,
+}: FlowFieldProps) {
+  const flowOffset = activeIndex * 18 + answeredCount * 31;
+
+  return (
+    <motion.svg
+      className="pointer-events-none absolute inset-0 z-[1] h-full w-full text-[#111]"
+      viewBox="0 0 1200 760"
+      preserveAspectRatio="none"
+      aria-hidden
+      animate={prefersReducedMotion ? undefined : { x: [-18, 14, -18] }}
+      transition={{
+        duration: 18,
+        repeat: prefersReducedMotion ? 0 : Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      {[0, 1, 2].map((line) => {
+        const y = 160 + line * 165 + (flowOffset % 37);
+        const bend = 90 + line * 28 + answeredCount * 10;
+
+        return (
+          <motion.path
+            key={line}
+            d={`M -80 ${y} C 220 ${y - bend}, 430 ${y + bend}, 690 ${
+              y - bend * 0.55
+            } S 1050 ${y + bend * 0.9}, 1290 ${y - 24}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="5 18"
+            opacity="0.12"
+            initial={false}
+            animate={
+              prefersReducedMotion
+                ? undefined
+                : {
+                    pathLength: [0.55, 1, 0.55],
+                    pathOffset: [0, 0.22, 0],
+                    opacity: [0.06, 0.16, 0.06],
+                  }
+            }
+            transition={{
+              duration: 10 + line * 1.8,
+              repeat: prefersReducedMotion ? 0 : Infinity,
+              ease: "easeInOut",
+              delay: line * 0.35,
+            }}
+          />
+        );
+      })}
+    </motion.svg>
+  );
+}
+
 type CoffeeMarkProps = {
   locale: Locale;
   profile: CoffeeProfile;
@@ -362,6 +456,8 @@ type CoffeeMarkProps = {
   match: number;
   slot: { x: number; y: number };
   index: number;
+  orbitIndex: number;
+  answeredCount: number;
   prefersReducedMotion: boolean;
 };
 
@@ -372,6 +468,8 @@ function CoffeeMark({
   match,
   slot,
   index,
+  orbitIndex,
+  answeredCount,
   prefersReducedMotion,
 }: CoffeeMarkProps) {
   const copy = coffeeFinderCopy[locale];
@@ -380,6 +478,10 @@ function CoffeeMark({
   const visualSize = isActive ? activeSize : size;
   const opacity = isActive ? 1 : match > 70 ? 0.68 : 0.36;
   const floatY = prefersReducedMotion ? 0 : isActive ? -5 : index % 2 ? 5 : -4;
+  const sideDrift = prefersReducedMotion
+    ? 0
+    : Math.sin((answeredCount + 1) * (orbitIndex + 1)) * 4;
+  const settleDelay = prefersReducedMotion ? 0 : orbitIndex * 0.045;
 
   return (
     <motion.div
@@ -394,8 +496,31 @@ function CoffeeMark({
         left: `${slot.x}%`,
         top: `${slot.y}%`,
         opacity,
+        x: sideDrift,
       }}
-      transition={{ duration: prefersReducedMotion ? 0 : 0.7, ease: "easeOut" }}
+      transition={{
+        left: {
+          type: "spring",
+          stiffness: 72,
+          damping: 18,
+          mass: 0.9 + orbitIndex * 0.08,
+          delay: settleDelay,
+        },
+        top: {
+          type: "spring",
+          stiffness: 62,
+          damping: 19,
+          mass: 1 + orbitIndex * 0.08,
+          delay: settleDelay,
+        },
+        x: {
+          duration: prefersReducedMotion ? 0 : 5.8 + orbitIndex * 0.4,
+          repeat: prefersReducedMotion ? 0 : Infinity,
+          repeatType: "mirror",
+          ease: "easeInOut",
+        },
+        opacity: { duration: prefersReducedMotion ? 0 : 0.35 },
+      }}
     >
       <Link
         href={withLocale(`/stories/${profile.storySlug}`, locale)}
@@ -412,16 +537,22 @@ function CoffeeMark({
           }}
           animate={{
             y: [0, floatY, 0],
-            rotate: isActive ? 0 : profile.scatter.rotate,
+            rotate: isActive
+              ? [0, -1.6, 0.8, 0]
+              : [profile.scatter.rotate, profile.scatter.rotate + 2.2, profile.scatter.rotate],
             scale: isActive ? 1.08 : 1,
           }}
           transition={{
             y: {
-              duration: prefersReducedMotion ? 0 : 4.6 + index * 0.2,
+              duration: prefersReducedMotion ? 0 : 5.2 + orbitIndex * 0.3,
               repeat: prefersReducedMotion ? 0 : Infinity,
               ease: "easeInOut",
             },
-            rotate: { duration: prefersReducedMotion ? 0 : 0.7 },
+            rotate: {
+              duration: prefersReducedMotion ? 0 : isActive ? 5.5 : 7 + orbitIndex,
+              repeat: prefersReducedMotion ? 0 : Infinity,
+              ease: "easeInOut",
+            },
             scale: { duration: prefersReducedMotion ? 0 : 0.45 },
           }}
         >
