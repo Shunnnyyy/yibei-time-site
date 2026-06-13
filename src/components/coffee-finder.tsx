@@ -98,20 +98,20 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   return (
     <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-white text-[#111]">
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
-      <div className="pointer-events-none absolute inset-0 dot-bg opacity-[0.18]" />
+      <div className="pointer-events-none absolute inset-0 fine-dot-bg opacity-[0.2]" />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl flex-col border-x border-[#111] px-5 pb-8 pt-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href={withLocale("/", locale)}
-            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold transition hover:bg-[#111] hover:text-white"
+            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold shadow-[3px_3px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             {copy.backHome}
           </Link>
           <Link
             href={withLocale("/stories", locale)}
-            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold transition hover:bg-[#111] hover:text-white"
+            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold shadow-[3px_3px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
           >
             {copy.allStories}
             <BookOpen className="h-4 w-4" aria-hidden />
@@ -123,16 +123,20 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
             initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="relative z-30 mx-auto w-full max-w-[390px] border border-[#111] bg-white/95 p-3 text-center shadow-[5px_5px_0_#111] backdrop-blur lg:absolute lg:left-1/2 lg:top-5 lg:-translate-x-1/2"
+            className="relative z-30 mx-auto w-full max-w-[420px] border border-[#111] bg-white/95 p-4 text-center shadow-[6px_6px_0_#111] backdrop-blur lg:absolute lg:left-1/2 lg:top-5 lg:-translate-x-1/2"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
               {copy.eyebrow}
             </p>
-            <h1 className="mt-2 text-xl font-semibold leading-tight text-[#111] sm:text-2xl">
+            <h1 className="mt-2 text-2xl font-semibold leading-tight text-[#111] sm:text-[28px]">
               {copy.pageTitle}
             </h1>
             <p className="mt-2 text-xs leading-5 text-[#333]">{copy.pageBody}</p>
-            <div className="mt-3 border border-[#111] bg-[#f7f7f7] p-2">
+            <div className="mt-4 grid grid-cols-[54px_1fr] items-center border border-[#111] bg-[#f7f7f7] text-left">
+              <div className="flex h-full min-h-16 items-center justify-center border-r border-[#111] bg-white text-[#111]">
+                <CoffeeIcon id={activeProfile.icon} className="h-8 w-8" />
+              </div>
+              <div className="p-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
                 {copy.selectedLabel}
               </p>
@@ -142,6 +146,7 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
               <p className="mt-1 text-[11px] leading-4 text-[#444]">
                 {activeProfile.flavor[locale]}
               </p>
+              </div>
             </div>
           </motion.div>
 
@@ -237,7 +242,7 @@ function CoffeeMark({
         aria-label={`${copy.openStory}: ${profile.name[locale]}, ${profile.flavor[locale]}`}
         data-coffee-id={profile.id}
         data-active={isActive}
-        className="relative flex flex-col items-center text-center outline-none"
+        className="relative flex flex-col items-center text-center outline-none focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-4"
       >
         <motion.span
           className="relative flex items-center justify-center rounded-full border border-[#111] bg-white font-semibold text-[#111] shadow-[0_20px_35px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-[#111] group-hover:text-white group-focus-visible:bg-[#111] group-focus-visible:text-white"
@@ -269,6 +274,10 @@ function CoffeeMark({
           <span className="block font-normal text-[#444]">
             {profile.tag[locale]} / {profile.flavor[locale]}
           </span>
+          <span className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.12em]">
+            {copy.openStory}
+            <span aria-hidden>↗</span>
+          </span>
         </span>
       </Link>
     </motion.div>
@@ -299,9 +308,10 @@ function CoffeeDial({
   const selectedAge = ageBands[ageIndex] ?? "student";
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#111] bg-white/95 px-5 pb-5 pt-10 backdrop-blur sm:px-8">
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#111] bg-white/95 px-5 pb-5 pt-10 shadow-[0_-16px_40px_rgba(0,0,0,0.06)] backdrop-blur sm:px-8">
       <div className="pointer-events-none absolute left-1/2 top-0 h-28 w-[290px] -translate-x-1/2 -translate-y-[74px] overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-[290px] rounded-full border border-[#111] bg-white" />
+        <div className="absolute inset-x-8 top-8 h-[226px] rounded-full border border-dashed border-[#111]/35" />
         <motion.div
           className="absolute left-1/2 top-[76px] h-[92px] w-px origin-top bg-[#111]"
           animate={{ rotate: dialRotation }}

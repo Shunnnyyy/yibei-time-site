@@ -41,16 +41,19 @@ export function StoryPreview({
                 priority={index === 0}
                 className="object-cover grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0"
               />
+              <span className="absolute left-3 top-3 border border-[#111] bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#111]">
+                {index + 1 < 10 ? `0${index + 1}` : index + 1}
+              </span>
             </div>
-            <div className="space-y-4 p-5">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#555]">
+            <div className="grid min-h-[230px] grid-rows-[auto_1fr_auto] border-t border-[#111] p-5">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-[#555]">
                 <span>{story.city[locale]}</span>
                 <span aria-hidden>·</span>
                 <time dateTime={story.date}>{story.date}</time>
                 <span aria-hidden>·</span>
                 <span>{story.status[locale]}</span>
               </div>
-              <div className="space-y-2">
+              <div className="mt-4 space-y-2">
                 <h3 className="text-xl font-semibold leading-7 text-[#111]">
                   {story.title[locale]}
                 </h3>
@@ -58,7 +61,7 @@ export function StoryPreview({
                   {story.summary[locale]}
                 </p>
               </div>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#111]">
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#111]">
                 {locale === "zh" ? "阅读故事" : "Read story"}
                 <ArrowRight
                   className="h-4 w-4 transition group-hover:translate-x-1"

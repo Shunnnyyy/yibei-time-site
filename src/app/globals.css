@@ -49,6 +49,19 @@ textarea {
   background-size: 18px 18px;
 }
 
+.fine-dot-bg {
+  background-image: radial-gradient(rgba(17, 17, 17, 0.16) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.ink-shadow {
+  box-shadow: 6px 6px 0 #111111;
+}
+
+.ink-shadow-lg {
+  box-shadow: 10px 10px 0 #111111;
+}
+
 .coffee-range {
   height: 24px;
   appearance: none;

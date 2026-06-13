@@ -32,22 +32,45 @@ export default async function Home({ searchParams }: HomeProps) {
 
       <section
         id="booking"
-        className="grid-bg mx-auto grid max-w-7xl grid-cols-1 gap-8 border-x border-[#111] px-5 py-6 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.82fr)] lg:items-center lg:py-8"
+        className="grid-bg mx-auto grid max-w-7xl grid-cols-1 gap-8 border-x border-[#111] px-5 py-6 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.82fr)] lg:items-center lg:py-10"
       >
         <div className="space-y-5">
           <div className="max-w-2xl space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
+              <span className="border border-[#111] bg-white px-2 py-1 text-[#111]">
+                Summer 2026
+              </span>
+              <span>
+                {locale === "zh"
+                  ? "福州 · 多伦多 · 线上"
+                  : "Fuzhou · Toronto · Online"}
+              </span>
+            </div>
             <h1 className="text-4xl font-semibold leading-[1.14] tracking-normal text-[#111] sm:text-5xl lg:text-[48px]">
               {copy.heroTitle}
             </h1>
             <p className="max-w-xl text-base leading-7 text-[#333]">
               {copy.heroBody}
             </p>
+            <div className="grid max-w-xl grid-cols-3 border border-[#111] bg-white text-center text-xs font-semibold text-[#111]">
+              {(locale === "zh"
+                ? ["线下", "线上", "邮件确认"]
+                : ["In person", "Online", "Email confirm"]
+              ).map((item) => (
+                <span
+                  key={item}
+                  className="border-r border-[#111] px-2 py-2 last:border-r-0"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
 
           <BookingForm locale={locale} />
         </div>
 
-        <div className="relative min-h-[460px] overflow-hidden border border-[#111] bg-[#f2f2f2] shadow-[8px_8px_0_#111]">
+        <div className="ink-shadow-lg relative min-h-[460px] overflow-hidden border border-[#111] bg-[#f2f2f2] lg:min-h-[540px]">
           <Image
             src="/images/coffee-hero.jpg"
             alt={locale === "zh" ? "咖啡桌面真实照片" : "Real coffee table photo"}
@@ -56,6 +79,9 @@ export default async function Home({ searchParams }: HomeProps) {
             sizes="(min-width: 1024px) 42vw, 100vw"
             className="object-cover grayscale"
           />
+          <div className="absolute left-4 top-4 border border-[#111] bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#111]">
+            yibei.chat
+          </div>
           <div className="absolute bottom-5 left-5 right-5 border border-[#111] bg-white p-4 text-sm leading-6 text-[#111]">
             <p className="font-semibold">{copy.heroNoteTitle}</p>
             <p className="mt-1">{copy.heroNoteBody}</p>
@@ -86,12 +112,15 @@ export default async function Home({ searchParams }: HomeProps) {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
-          <div className="relative min-h-[230px] overflow-hidden border border-[#111] bg-white">
+          <div className="ink-shadow relative min-h-[250px] overflow-hidden border border-[#111] bg-white">
             <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
+            <div className="absolute right-3 top-3 border border-[#111] bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#111]">
+              06 entries
+            </div>
             {coffeeProfiles.map((profile, index) => (
               <span
                 key={profile.id}
-                className="absolute flex items-center justify-center rounded-full border border-[#111] bg-white text-[#111] shadow-[0_16px_28px_rgba(0,0,0,0.08)]"
+                className="absolute flex items-center justify-center rounded-full border border-[#111] bg-white text-[#111] shadow-[0_16px_28px_rgba(0,0,0,0.08)] transition hover:-translate-y-1 hover:bg-[#111] hover:text-white"
                 style={{
                   width: index % 2 === 0 ? 82 : 62,
                   height: index % 2 === 0 ? 82 : 62,
