@@ -22,7 +22,7 @@ export default async function CoffeeFinderPage({
   const locale = getLocale(params?.lang);
 
   return (
-    <main className="min-h-screen bg-white text-[#111]">
+    <main className="min-h-screen bg-[#f4f1e8] text-[#111]">
       <SiteHeader locale={locale} />
       <CoffeeFinder locale={locale} />
     </main>

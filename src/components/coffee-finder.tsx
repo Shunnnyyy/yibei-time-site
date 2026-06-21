@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, RotateCcw, Sparkle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  ExternalLink,
+  RotateCcw,
+  Sparkle,
+} from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import { CoffeeIcon } from "@/components/coffee-icons";
@@ -205,12 +212,25 @@ function calculateMatch(profile: CoffeeProfile, userAnswers: UserAnswers) {
   return Math.round((score / maxScore) * 100);
 }
 
+function activeIndexForAnswers(userAnswers: UserAnswers) {
+  const activeProfile = coffeeProfiles
+    .map((profile, index) => ({
+      profile,
+      match: calculateMatch(profile, userAnswers),
+      index,
+    }))
+    .sort((a, b) => b.match - a.match || a.index - b.index)[0]?.profile;
+
+  return coffeeProfiles.findIndex((profile) => profile.id === activeProfile?.id);
+}
+
 export function CoffeeFinder({ locale }: CoffeeFinderProps) {
   const copy = coffeeFinderCopy[locale];
   const prefersReducedMotion = useReducedMotion();
   const [isStarted, setIsStarted] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
+  const [motionDirection, setMotionDirection] = useState<-1 | 0 | 1>(0);
 
   const rankedProfiles = useMemo(() => {
     return coffeeProfiles
@@ -232,7 +252,23 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
 
   function handleAnswer(questionId: QuestionId, answerId: AnswerId) {
     setIsStarted(true);
-    setUserAnswers((current) => ({ ...current, [questionId]: answerId }));
+    setUserAnswers((current) => {
+      const nextAnswers = { ...current, [questionId]: answerId };
+      const nextActiveIndex = activeIndexForAnswers(nextAnswers);
+      const indexDelta =
+        (nextActiveIndex - activeIndex + coffeeProfiles.length) %
+        coffeeProfiles.length;
+
+      setMotionDirection(
+        indexDelta === 0
+          ? 0
+          : indexDelta <= coffeeProfiles.length / 2
+            ? 1
+            : -1,
+      );
+
+      return nextAnswers;
+    });
     setQuestionIndex((current) => Math.min(current + 1, questions.length - 1));
   }
 
@@ -240,146 +276,196 @@ export function CoffeeFinder({ locale }: CoffeeFinderProps) {
     setUserAnswers({});
     setQuestionIndex(0);
     setIsStarted(false);
+    setMotionDirection(0);
   }
 
   return (
-    <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-white text-[#111]">
-      <div className="pointer-events-none absolute inset-0 grid-bg opacity-80" />
-      <div className="pointer-events-none absolute inset-0 fine-dot-bg opacity-[0.2]" />
+    <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-[#111] bg-[#f4f1e8] text-[#111]">
+      <div className="pointer-events-none absolute inset-0 brutal-paper opacity-95" />
       <FlowField
         activeIndex={activeIndex}
         answeredCount={answeredCount}
         prefersReducedMotion={Boolean(prefersReducedMotion)}
       />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl flex-col border-x border-[#111] px-5 pb-8 pt-5 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl flex-col px-5 pb-8 pt-5 sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#111] pb-4">
           <Link
             href={withLocale("/", locale)}
-            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold shadow-[3px_3px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
+            className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-sm font-semibold shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             {copy.backHome}
           </Link>
-          <Link
-            href={withLocale("/stories", locale)}
-            className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold shadow-[3px_3px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
-          >
-            {copy.allStories}
-            <BookOpen className="h-4 w-4" aria-hidden />
-          </Link>
+          <p className="hidden text-[11px] font-semibold uppercase tracking-[0.32em] text-[#555] sm:block">
+            Field tasting / story selector
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="https://github.com/SAY-5/recommendation-quiz"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-sm font-semibold shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
+            >
+              {locale === "zh" ? "模板方案" : "Template"}
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
+            <a
+              href="https://www.figma.com/design/BAn5704XC7EF1hVIGiqNgm?node-id=5-2"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-sm font-semibold shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
+            >
+              {locale === "zh" ? "动效稿" : "Motion"}
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
+            <Link
+              href={withLocale("/stories", locale)}
+              className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-sm font-semibold shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5 hover:bg-[#111] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2"
+            >
+              {copy.allStories}
+              <BookOpen className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
         </div>
 
-        <div className="relative flex flex-1 flex-col gap-6 pb-[240px] pt-6 lg:min-h-[700px] lg:pb-[190px]">
-          <motion.div
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div className="grid flex-1 gap-6 pt-6 lg:grid-cols-[minmax(320px,0.82fr)_minmax(0,1.18fr)] lg:items-start">
+          <motion.aside
+            initial={prefersReducedMotion ? false : { opacity: 0, x: -18 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.35 }}
-            className="relative z-30 mx-auto w-full max-w-[420px] border border-[#111] bg-white/95 p-4 text-center shadow-[6px_6px_0_#111] backdrop-blur lg:absolute lg:left-1/2 lg:top-5 lg:-translate-x-1/2"
+            className="relative z-30 space-y-4"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
-              {copy.eyebrow}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold leading-tight text-[#111] sm:text-[28px]">
-              {isStarted ? activeProfile.name[locale] : copy.pageTitle}
-            </h1>
-            <p className="mt-2 text-xs leading-5 text-[#333]">
-              {isStarted ? activeProfile.description[locale] : copy.pageBody}
-            </p>
-            <div className="mt-4 grid grid-cols-[54px_1fr] items-center border border-[#111] bg-[#f7f7f7] text-left">
-              <div className="flex h-full min-h-16 items-center justify-center border-r border-[#111] bg-white text-[#111]">
-                <CoffeeIcon id={activeProfile.icon} className="h-8 w-8" />
+            <div className="border border-[#111] bg-[#fdfbf4] p-5 shadow-[6px_6px_0_#111]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#555]">
+                {copy.eyebrow}
+              </p>
+              <h1 className="mt-3 text-[38px] font-semibold leading-[1.02] text-[#111] [word-break:keep-all] sm:text-[44px]">
+                {isStarted ? activeProfile.name[locale] : copy.pageTitle}
+              </h1>
+              <p className="mt-4 text-sm leading-6 text-[#333]">
+                {isStarted ? activeProfile.description[locale] : copy.pageBody}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-[72px_1fr] border border-[#111] bg-white shadow-[4px_4px_0_#111]">
+              <div className="flex min-h-24 items-center justify-center border-r border-[#111] bg-[#111] text-white">
+                <CoffeeIcon id={activeProfile.icon} className="h-10 w-10" />
               </div>
-              <div className="p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
-                      {isStarted
-                        ? locale === "zh"
-                          ? "适合度"
-                          : "Fit"
-                        : copy.selectedLabel}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#111]">
-                      {isStarted
-                        ? locale === "zh"
-                          ? `${activeMatch}% 靠近`
-                          : `${activeMatch}% fit`
-                        : activeProfile.name[locale]}
-                    </p>
-                  </div>
-                  {!isStarted ? (
-                    <button
-                      type="button"
-                      className="border border-[#111] bg-[#111] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#111]"
-                      onClick={() => setIsStarted(true)}
-                    >
-                      {locale === "zh" ? "开始" : "Start"}
-                    </button>
-                  ) : null}
-                </div>
-                <p className="mt-1 text-[11px] leading-4 text-[#444]">
+              <div className="p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#555]">
+                  {isStarted
+                    ? locale === "zh"
+                      ? "当前匹配"
+                      : "Current match"
+                    : copy.selectedLabel}
+                </p>
+                <p className="mt-1 text-xl font-semibold leading-7 text-[#111]">
+                  {isStarted
+                    ? locale === "zh"
+                      ? `${activeMatch}% 靠近`
+                      : `${activeMatch}% fit`
+                    : activeProfile.name[locale]}
+                </p>
+                <p className="mt-1 text-sm leading-5 text-[#444]">
                   {activeProfile.flavor[locale]}
                 </p>
               </div>
             </div>
-          </motion.div>
 
-          <div
-            className="relative z-20 grid min-h-[520px] grid-cols-2 items-center gap-x-4 gap-y-8 pt-2 sm:grid-cols-3 lg:absolute lg:inset-0 lg:block lg:pt-0"
-            aria-label={copy.pageTitle}
-          >
-            {coffeeProfiles.map((profile, index) => {
-              const isActive = profile.id === activeProfile.id;
-              const orbitIndex =
-                (index - activeIndex + coffeeProfiles.length) %
-                coffeeProfiles.length;
-              const slot = orbitSlots[orbitIndex] ?? {
-                x: profile.scatter.x,
-                y: profile.scatter.y,
-              };
-              const fluidPosition = fluidSlot(
-                slot,
-                orbitIndex,
-                activeIndex,
-                answeredCount,
-                isActive,
-              );
-              const match =
-                rankedProfiles.find((item) => item.profile.id === profile.id)
-                  ?.match ?? 0;
+            <QuestionDeck
+              locale={locale}
+              isStarted={isStarted}
+              questionIndex={questionIndex}
+              userAnswers={userAnswers}
+              activeProfile={activeProfile}
+              activeMatch={activeMatch}
+              dialRotation={dialRotation}
+              onStart={() => setIsStarted(true)}
+              onAnswer={handleAnswer}
+              onBack={() => setQuestionIndex((current) => Math.max(current - 1, 0))}
+              onReset={resetFinder}
+            />
+          </motion.aside>
 
-              return (
-                <CoffeeMark
-                  key={profile.id}
-                  locale={locale}
-                  profile={profile}
-                  isActive={isActive}
-                  match={match}
-                  slot={fluidPosition}
-                  index={index}
-                  orbitIndex={orbitIndex}
-                  answeredCount={answeredCount}
-                  prefersReducedMotion={Boolean(prefersReducedMotion)}
-                />
-              );
-            })}
+          <div className="relative z-20 min-h-[560px] overflow-hidden border border-[#111] bg-[#fdfbf4] shadow-[7px_7px_0_#111] lg:min-h-[590px]">
+            <LineArtPoster
+              locale={locale}
+              activeIndex={activeIndex}
+              activeProfile={activeProfile}
+              answeredCount={answeredCount}
+              motionDirection={motionDirection}
+              prefersReducedMotion={Boolean(prefersReducedMotion)}
+            />
+            <div
+              className="absolute inset-0 z-20 hidden lg:block"
+              aria-label={copy.pageTitle}
+            >
+              {coffeeProfiles.map((profile, index) => {
+                const isActive = profile.id === activeProfile.id;
+                if (isActive) {
+                  return null;
+                }
+
+                const orbitIndex =
+                  (index - activeIndex + coffeeProfiles.length) %
+                  coffeeProfiles.length;
+                const slot = orbitSlots[orbitIndex] ?? {
+                  x: profile.scatter.x,
+                  y: profile.scatter.y,
+                };
+                const fluidPosition = fluidSlot(
+                  slot,
+                  orbitIndex,
+                  activeIndex,
+                  answeredCount,
+                  isActive,
+                );
+                const match =
+                  rankedProfiles.find((item) => item.profile.id === profile.id)
+                    ?.match ?? 0;
+
+                return (
+                  <CoffeeMark
+                    key={profile.id}
+                    locale={locale}
+                    profile={profile}
+                    isActive={isActive}
+                    match={match}
+                    slot={fluidPosition}
+                    index={index}
+                    orbitIndex={orbitIndex}
+                    answeredCount={answeredCount}
+                    prefersReducedMotion={Boolean(prefersReducedMotion)}
+                  />
+                );
+              })}
+            </div>
+            <div className="relative z-30 grid grid-cols-2 gap-3 p-4 pt-[440px] sm:grid-cols-3 lg:hidden">
+              {coffeeProfiles.map((profile, index) => {
+                const isActive = profile.id === activeProfile.id;
+                const match =
+                  rankedProfiles.find((item) => item.profile.id === profile.id)
+                    ?.match ?? 0;
+
+                return (
+                  <CoffeeMark
+                    key={profile.id}
+                    locale={locale}
+                    profile={profile}
+                    isActive={isActive}
+                    match={match}
+                    slot={{ x: 50, y: 50 }}
+                    index={index}
+                    orbitIndex={index}
+                    answeredCount={answeredCount}
+                    prefersReducedMotion={Boolean(prefersReducedMotion)}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
-
-        <QuestionDeck
-          locale={locale}
-          isStarted={isStarted}
-          questionIndex={questionIndex}
-          userAnswers={userAnswers}
-          activeProfile={activeProfile}
-          activeMatch={activeMatch}
-          dialRotation={dialRotation}
-          onStart={() => setIsStarted(true)}
-          onAnswer={handleAnswer}
-          onBack={() => setQuestionIndex((current) => Math.max(current - 1, 0))}
-          onReset={resetFinder}
-        />
       </div>
     </section>
   );
@@ -449,6 +535,205 @@ function FlowField({
   );
 }
 
+type LineArtPosterProps = {
+  locale: Locale;
+  activeIndex: number;
+  activeProfile: CoffeeProfile;
+  answeredCount: number;
+  motionDirection: -1 | 0 | 1;
+  prefersReducedMotion: boolean;
+};
+
+function LineArtPoster({
+  locale,
+  activeIndex,
+  activeProfile,
+  answeredCount,
+  motionDirection,
+  prefersReducedMotion,
+}: LineArtPosterProps) {
+  const previousProfile =
+    coffeeProfiles[(activeIndex - 1 + coffeeProfiles.length) % coffeeProfiles.length];
+  const nextProfile = coffeeProfiles[(activeIndex + 1) % coffeeProfiles.length];
+
+  return (
+    <div className="absolute inset-0 z-10 overflow-hidden">
+      <div className="absolute inset-0 brutal-paper opacity-80" />
+      <div className="absolute left-5 top-5 border border-[#111] bg-white px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] shadow-[4px_4px_0_#111]">
+        {locale === "zh" ? "咖啡索引" : "Coffee index"}
+      </div>
+      <div className="absolute right-5 top-5 max-w-[12rem] text-right text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[#555]">
+        {activeProfile.tag[locale]}
+      </div>
+      <svg
+        className="absolute left-1/2 top-[42%] h-[540px] w-[660px] -translate-x-1/2 -translate-y-1/2 text-[#111] sm:h-[590px] sm:w-[700px]"
+        viewBox="0 0 760 640"
+        aria-hidden
+      >
+        <defs>
+          <pattern id="coffee-lines" width="18" height="18" patternUnits="userSpaceOnUse">
+            <path d="M0 18 L18 0" stroke="currentColor" strokeWidth="0.5" opacity="0.12" />
+          </pattern>
+        </defs>
+        <path
+          d="M48 214 C 156 152, 246 286, 356 210 S 594 126, 718 214"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          opacity="0.24"
+        />
+        <path
+          d="M32 386 C 186 314, 302 468, 438 372 S 612 288, 736 360"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeDasharray="8 10"
+          opacity="0.26"
+        />
+        <circle cx="380" cy="346" r="178" fill="white" stroke="currentColor" strokeWidth="2" />
+        <circle cx="380" cy="346" r="128" fill="none" stroke="currentColor" strokeDasharray="7 9" opacity="0.36" />
+        <path d="M264 338 H496" stroke="currentColor" strokeWidth="2" />
+        <path d="M320 338 L342 454 H418 L440 338" fill="white" stroke="currentColor" strokeWidth="3" />
+        <path d="M334 366 H426 M340 394 H420 M348 422 H412" stroke="currentColor" strokeWidth="2" />
+        <path d="M340 298 C336 282, 356 280, 350 262 M380 298 C376 282, 396 280, 390 262 M420 298 C416 282, 436 280, 430 262" fill="none" stroke="currentColor" strokeWidth="2" />
+        <path d="M210 544 C 282 502, 482 502, 552 544" fill="none" stroke="currentColor" strokeWidth="2" />
+        <path d="M164 570 H596" stroke="currentColor" strokeWidth="2" />
+        <rect x="116" y="122" width="132" height="96" fill="white" stroke="currentColor" strokeWidth="1.5" opacity="0.72" />
+        <rect x="522" y="134" width="110" height="82" fill="url(#coffee-lines)" stroke="currentColor" strokeWidth="1.5" opacity="0.72" />
+        <circle cx="190" cy="472" r="42" fill="white" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
+        <circle cx="596" cy="456" r="34" fill="white" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
+      </svg>
+      <div className="absolute inset-x-8 top-[118px] z-20 hidden h-[280px] sm:block">
+        <div className="absolute left-1/2 top-[112px] h-px w-[68%] -translate-x-1/2 bg-[#111]" />
+        <div className="absolute left-1/2 top-[112px] h-[130px] w-[58%] -translate-x-1/2 rounded-[50%] border-b border-dashed border-[#111]/35" />
+        <motion.div
+          key={`previous-${previousProfile.id}`}
+          data-motion-frame="outgoing"
+          className="absolute left-[16%] top-[86px] flex h-20 w-20 items-center justify-center rounded-[1.2rem] border border-[#111] bg-white/80 opacity-55 shadow-[3px_3px_0_#111]"
+          initial={
+            prefersReducedMotion
+              ? false
+              : { opacity: 0.2, x: motionDirection < 0 ? 40 : -18, scale: 0.78 }
+          }
+          animate={
+            prefersReducedMotion
+              ? { opacity: 0.55, x: 0, scale: 1 }
+              : { opacity: 0.55, x: [-4, 4, -4], rotate: [-2, 2, -2], scale: 1 }
+          }
+          transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <CoffeeIcon id={previousProfile.icon} className="h-10 w-10" />
+        </motion.div>
+        <motion.div
+          key={`next-${nextProfile.id}`}
+          data-motion-frame="incoming"
+          className="absolute right-[16%] top-[86px] flex h-20 w-20 items-center justify-center rounded-[1.2rem] border border-[#111] bg-white/80 opacity-55 shadow-[3px_3px_0_#111]"
+          initial={
+            prefersReducedMotion
+              ? false
+              : { opacity: 0.2, x: motionDirection > 0 ? -40 : 18, scale: 0.78 }
+          }
+          animate={
+            prefersReducedMotion
+              ? { opacity: 0.55, x: 0, scale: 1 }
+              : { opacity: 0.55, x: [4, -4, 4], rotate: [2, -2, 2], scale: 1 }
+          }
+          transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <CoffeeIcon id={nextProfile.icon} className="h-10 w-10" />
+        </motion.div>
+        <motion.div
+          key={activeProfile.id}
+          data-motion-frame="focus"
+          className="absolute left-1/2 top-[42px] flex h-36 w-36 -translate-x-1/2 items-center justify-center rounded-[1.8rem] border-2 border-[#111] bg-white shadow-[7px_7px_0_#111]"
+          initial={
+            prefersReducedMotion
+              ? false
+              : {
+                  opacity: 0,
+                  x: motionDirection * 96,
+                  y: 18,
+                  scale: 0.82,
+                  rotate: motionDirection * 8,
+                }
+          }
+          animate={
+            prefersReducedMotion
+              ? { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 }
+              : {
+                  opacity: 1,
+                  x: [0, -7, 0, 6, 0],
+                  y: [0, -9, 0],
+                  scale: [1, 1.04, 1],
+                  rotate: [0, -2, 1.5, 0],
+                }
+          }
+          transition={{
+            opacity: { duration: 0.18 },
+            x: { duration: 6.8, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" },
+            y: { duration: 4.8, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" },
+            scale: { duration: 4.8, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" },
+            rotate: { duration: 6.8, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" },
+          }}
+        >
+          <motion.span
+            className="absolute -top-8 left-1/2 h-8 w-12 -translate-x-1/2 text-[#111]"
+            animate={
+              prefersReducedMotion
+                ? undefined
+                : { opacity: [0.2, 1, 0.25], y: [8, -4, -14] }
+            }
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
+            aria-hidden
+          >
+            <span className="absolute left-1 top-2 h-6 w-px rotate-[-10deg] bg-current" />
+            <span className="absolute left-5 top-0 h-7 w-px rotate-[8deg] bg-current" />
+            <span className="absolute right-1 top-3 h-5 w-px rotate-[14deg] bg-current" />
+          </motion.span>
+          <motion.span
+            className="absolute inset-[-18px] rounded-[2.2rem] border border-dashed border-[#111]/35"
+            animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+            transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+            aria-hidden
+          />
+          <CoffeeIcon id={activeProfile.icon} className="relative h-20 w-20" />
+        </motion.div>
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
+          {coffeeProfiles.map((profile, index) => (
+            <span
+              key={profile.id}
+              className={`h-2.5 border border-[#111] transition-all ${
+                index === activeIndex ? "w-8 bg-[#111]" : "w-2.5 bg-white"
+              }`}
+            />
+          ))}
+        </div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#555]">
+          {locale === "zh"
+            ? `第 ${answeredCount} 次漂移`
+            : `Drift ${answeredCount}`}
+        </div>
+      </div>
+      <div className="absolute bottom-4 left-4 right-4 grid border border-[#111] bg-white shadow-[4px_4px_0_#111] sm:grid-cols-[1fr_88px]">
+        <div className="p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#555]">
+            {locale === "zh" ? "当前漂移" : "Current drift"}
+          </p>
+          <p className="mt-1 text-xl font-semibold leading-7">
+            {activeProfile.name[locale]}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-[#444]">
+            {activeProfile.description[locale]}
+          </p>
+        </div>
+        <div className="flex items-center justify-center border-t border-[#111] p-4 sm:border-l sm:border-t-0">
+          <CoffeeIcon id={activeProfile.icon} className="h-14 w-14" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type CoffeeMarkProps = {
   locale: Locale;
   profile: CoffeeProfile;
@@ -485,11 +770,10 @@ function CoffeeMark({
 
   return (
     <motion.div
-      className="group relative flex justify-center lg:absolute"
+      className="group flex justify-center lg:absolute"
       style={{
         left: `${slot.x}%`,
         top: `${slot.y}%`,
-        translate: "-50% -50%",
         zIndex: isActive ? 22 : 10 - index,
       }}
       animate={{
@@ -527,7 +811,7 @@ function CoffeeMark({
         aria-label={`${copy.openStory}: ${profile.name[locale]}, ${profile.flavor[locale]}`}
         data-coffee-id={profile.id}
         data-active={isActive}
-        className="relative flex flex-col items-center text-center outline-none focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-4"
+        className="relative flex flex-col items-center text-center outline-none focus-visible:ring-2 focus-visible:ring-[#111] focus-visible:ring-offset-4 lg:-translate-x-1/2 lg:-translate-y-1/2"
       >
         <motion.span
           className="relative flex items-center justify-center rounded-full border border-[#111] bg-white font-semibold text-[#111] shadow-[0_20px_35px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-[#111] group-hover:text-white group-focus-visible:bg-[#111] group-focus-visible:text-white"
@@ -560,7 +844,11 @@ function CoffeeMark({
           <CoffeeIcon id={profile.icon} className="relative h-[54%] w-[54%]" />
         </motion.span>
 
-        <span className="mt-3 max-w-[13rem] border border-[#111] bg-white px-3 py-2 text-xs font-semibold leading-5 text-[#111] opacity-0 shadow-[3px_3px_0_#111] transition group-hover:opacity-100 group-focus-visible:opacity-100">
+        <span
+          className={`mt-3 max-w-[13rem] border border-[#111] bg-white px-3 py-2 text-xs font-semibold leading-5 text-[#111] shadow-[3px_3px_0_#111] transition group-hover:opacity-100 group-focus-visible:opacity-100 ${
+            isActive ? "opacity-100" : "opacity-0"
+          }`}
+        >
           {profile.name[locale]}
           <span className="block text-[11px] uppercase tracking-[0.12em] text-[#111]">
             {locale === "zh" ? `${match}% 靠近` : `${match}% fit`}
@@ -612,30 +900,30 @@ function QuestionDeck({
   const progress = Math.round((answeredCount / questions.length) * 100);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#111] bg-white/95 px-5 pb-5 pt-10 shadow-[0_-16px_40px_rgba(0,0,0,0.06)] backdrop-blur sm:px-8">
-      <div className="pointer-events-none absolute left-1/2 top-0 h-28 w-[290px] -translate-x-1/2 -translate-y-[74px] overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-[290px] rounded-full border border-[#111] bg-white" />
-        <div className="absolute inset-x-8 top-8 h-[226px] rounded-full border border-dashed border-[#111]/35" />
+    <div className="relative z-40 overflow-hidden border border-[#111] bg-[#fdfbf4] p-4 shadow-[6px_6px_0_#111]">
+      <div className="pointer-events-none absolute right-4 top-4 h-24 w-24 overflow-hidden opacity-90">
+        <div className="absolute inset-0 rounded-full border border-[#111] bg-white" />
+        <div className="absolute inset-4 rounded-full border border-dashed border-[#111]/35" />
         <motion.div
-          className="absolute left-1/2 top-[76px] h-[92px] w-px origin-top bg-[#111]"
+          className="absolute left-1/2 top-1/2 h-10 w-px origin-top bg-[#111]"
           animate={{ rotate: dialRotation }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         />
-        <div className="absolute left-1/2 top-4 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-[#111] bg-white text-[#111] shadow-[3px_3px_0_#111]">
-          <CoffeeIcon id={activeProfile.icon} className="h-7 w-7" />
+        <div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#111] bg-white text-[#111]">
+          <CoffeeIcon id={activeProfile.icon} className="h-6 w-6" />
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {!isStarted ? (
           <motion.div
             key="start"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]"
+            className="pr-24"
           >
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="grid gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
                   {locale === "zh" ? "慢慢选" : "Choose slowly"}
@@ -651,7 +939,7 @@ function QuestionDeck({
               </div>
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
+                className="inline-flex w-fit items-center justify-center gap-2 border border-[#111] bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#111]"
                 onClick={onStart}
               >
                 {locale === "zh" ? "开始" : "Start"}
@@ -665,7 +953,7 @@ function QuestionDeck({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="border border-[#111] bg-white p-4 shadow-[5px_5px_0_#111]"
+            className="pr-0 sm:pr-24"
           >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -681,7 +969,7 @@ function QuestionDeck({
                     {question.hint[locale]}
                   </p>
                 </div>
-                <div className="border border-[#111] bg-[#f7f7f7] px-3 py-2 text-right">
+                <div className="border border-[#111] bg-white px-3 py-2 text-right">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#555]">
                     {locale === "zh" ? "靠近" : "Fit"}
                   </p>
@@ -691,7 +979,7 @@ function QuestionDeck({
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {question.answers.map((answer) => {
                   const isSelected = selectedAnswer === answer.id;
 
@@ -702,7 +990,7 @@ function QuestionDeck({
                       className={`min-h-12 border px-3 py-2 text-sm font-semibold transition ${
                         isSelected
                           ? "border-[#111] bg-[#111] text-white"
-                          : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
+                          : "border-[#111] bg-[#fdfbf4] text-[#111] hover:bg-white"
                       }`}
                       aria-pressed={isSelected}
                       onClick={() => onAnswer(question.id, answer.id)}
@@ -715,7 +1003,7 @@ function QuestionDeck({
             </motion.div>
           )}
 
-        <div className="border border-[#111] bg-white px-4 py-3 shadow-[3px_3px_0_#111]">
+        <div className="border-t border-[#111] pt-4">
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#555]">
             <Sparkle className="h-3.5 w-3.5" aria-hidden />
             {isStarted
@@ -759,7 +1047,7 @@ function QuestionDeck({
               {isStarted ? (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-xs font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+                  className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-xs font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
                   onClick={onReset}
                 >
                   <RotateCcw className="h-3.5 w-3.5" aria-hidden />
@@ -769,7 +1057,7 @@ function QuestionDeck({
               {isStarted ? (
                 <Link
                   href={withLocale(`/stories/${activeProfile.storySlug}`, locale)}
-                  className="inline-flex items-center gap-2 border border-[#111] bg-white px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
+                  className="inline-flex items-center gap-2 border border-[#111] bg-[#fdfbf4] px-3 py-2 text-sm font-semibold text-[#111] transition hover:bg-[#111] hover:text-white"
                 >
                   {copy.openStory}
                   <ArrowRight className="h-4 w-4" aria-hidden />

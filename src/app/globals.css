@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
+  --background: #f7f2e8;
+  --foreground: #1d1712;
 }
 
 @theme inline {
@@ -32,34 +32,241 @@ textarea {
 }
 
 ::selection {
-  background: #111111;
-  color: #ffffff;
+  background: #1d1712;
+  color: #fffaf0;
+}
+
+@keyframes liquidDrift {
+  0% {
+    transform: translate3d(-2%, 0, 0) rotate(0deg) scale(1);
+    border-radius: 47% 53% 58% 42% / 48% 38% 62% 52%;
+  }
+
+  41% {
+    transform: translate3d(7%, -5%, 0) rotate(11deg) scale(1.08);
+    border-radius: 58% 42% 43% 57% / 38% 57% 43% 62%;
+  }
+
+  73% {
+    transform: translate3d(-4%, 6%, 0) rotate(-7deg) scale(0.96);
+    border-radius: 41% 59% 55% 45% / 54% 42% 58% 46%;
+  }
+
+  100% {
+    transform: translate3d(-2%, 0, 0) rotate(0deg) scale(1);
+    border-radius: 47% 53% 58% 42% / 48% 38% 62% 52%;
+  }
+}
+
+@keyframes pathPulse {
+  0% {
+    stroke-dashoffset: 820;
+    opacity: 0.2;
+  }
+
+  47% {
+    opacity: 0.92;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.24;
+  }
+}
+
+@keyframes nodeFloat {
+  0% {
+    margin-top: 0;
+  }
+
+  37% {
+    margin-top: -13px;
+  }
+
+  67% {
+    margin-top: 7px;
+  }
+
+  100% {
+    margin-top: 0;
+  }
+}
+
+@keyframes chipDrift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+
+  44% {
+    transform: translate3d(14px, -12px, 0) rotate(3deg);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+}
+
+@keyframes sheenSlide {
+  0% {
+    transform: translateX(-36%) skewX(-14deg);
+  }
+
+  100% {
+    transform: translateX(122%) skewX(-14deg);
+  }
+}
+
+.flow-orbit {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(2px);
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+  animation: liquidDrift 13s cubic-bezier(0.77, 0, 0.18, 1) infinite;
+}
+
+.flow-orbit-one {
+  top: 6rem;
+  left: -7rem;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(231, 166, 78, 0.42);
+}
+
+.flow-orbit-two {
+  right: -9rem;
+  bottom: 5rem;
+  width: 24rem;
+  height: 24rem;
+  background: rgba(9, 84, 86, 0.22);
+  animation-delay: -4s;
+  animation-duration: 17s;
+}
+
+.liquid-card {
+  isolation: isolate;
+}
+
+.flow-map path {
+  fill: none;
+  stroke: rgba(255, 250, 240, 0.78);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 16 18;
+  animation: pathPulse 7.5s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+}
+
+.flow-map path:nth-child(2) {
+  stroke: rgba(231, 166, 78, 0.86);
+  animation-delay: -2.3s;
+  animation-duration: 9.5s;
+}
+
+.flow-map path:nth-child(3) {
+  stroke: rgba(9, 84, 86, 0.72);
+  animation-delay: -4.8s;
+  animation-duration: 11s;
+}
+
+.schedule-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(29, 23, 18, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.88);
+  padding: 0.65rem 0.9rem;
+  color: #1d1712;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 18px 42px rgba(32, 24, 18, 0.16);
+  backdrop-filter: blur(16px);
+  animation: chipDrift 8s cubic-bezier(0.75, 0, 0.2, 1) infinite;
+}
+
+.schedule-chip-one {
+  top: 31%;
+  right: 8%;
+}
+
+.schedule-chip-two {
+  top: 54%;
+  left: 8%;
+  animation-delay: -3.2s;
+  animation-duration: 10s;
+}
+
+.flow-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flow-sheen::before {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 28%;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 250, 240, 0.12),
+    transparent
+  );
+  animation: sheenSlide 9s cubic-bezier(0.82, 0, 0.18, 1) infinite;
+}
+
+.fluid-grid {
+  background-image:
+    radial-gradient(circle at 18% 24%, rgba(231, 166, 78, 0.32), transparent 24%),
+    radial-gradient(circle at 72% 70%, rgba(9, 84, 86, 0.2), transparent 28%),
+    linear-gradient(rgba(29, 23, 18, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 23, 18, 0.055) 1px, transparent 1px);
+  background-size: auto, auto, 34px 34px, 34px 34px;
+}
+
+.coffee-node {
+  animation: nodeFloat 6.5s cubic-bezier(0.66, 0, 0.28, 1) infinite;
+}
+
+.brutal-paper {
+  background-image:
+    linear-gradient(rgba(17, 17, 17, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.055) 1px, transparent 1px),
+    radial-gradient(rgba(17, 17, 17, 0.16) 0.8px, transparent 0.8px);
+  background-size: 34px 34px, 34px 34px, 10px 10px;
+  background-position: -1px -1px, -1px -1px, 0 0;
 }
 
 .grid-bg {
   background-image:
-    linear-gradient(rgba(17, 17, 17, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.055) 1px, transparent 1px);
+    linear-gradient(rgba(29, 23, 18, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 23, 18, 0.055) 1px, transparent 1px);
   background-size: 32px 32px;
   background-position: -1px -1px;
 }
 
 .dot-bg {
-  background-image: radial-gradient(rgba(17, 17, 17, 0.22) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(29, 23, 18, 0.22) 1px, transparent 1px);
   background-size: 18px 18px;
 }
 
 .fine-dot-bg {
-  background-image: radial-gradient(rgba(17, 17, 17, 0.16) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(29, 23, 18, 0.16) 1px, transparent 1px);
   background-size: 14px 14px;
 }
 
 .ink-shadow {
-  box-shadow: 6px 6px 0 #111111;
+  box-shadow: 6px 6px 0 #1d1712;
 }
 
 .ink-shadow-lg {
-  box-shadow: 10px 10px 0 #111111;
+  box-shadow: 10px 10px 0 #1d1712;
 }
 
 .coffee-range {
@@ -74,19 +281,19 @@ textarea {
 }
 
 .coffee-range:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid #111111;
+  outline: 2px solid #1d1712;
   outline-offset: 3px;
 }
 
 .coffee-range:focus-visible::-moz-range-thumb {
-  outline: 2px solid #111111;
+  outline: 2px solid #1d1712;
   outline-offset: 3px;
 }
 
 .coffee-range::-webkit-slider-runnable-track {
   height: 4px;
-  border: 1px solid #111111;
-  background: #ffffff;
+  border: 1px solid #1d1712;
+  background: #fffaf0;
 }
 
 .coffee-range::-webkit-slider-thumb {
@@ -94,8 +301,8 @@ textarea {
   height: 22px;
   margin-top: -10px;
   appearance: none;
-  border: 1px solid #111111;
-  background: #111111;
+  border: 1px solid #1d1712;
+  background: #1d1712;
   transition: transform 160ms ease;
 }
 
@@ -105,19 +312,46 @@ textarea {
 
 .coffee-range::-moz-range-track {
   height: 4px;
-  border: 1px solid #111111;
-  background: #ffffff;
+  border: 1px solid #1d1712;
+  background: #fffaf0;
 }
 
 .coffee-range::-moz-range-thumb {
   width: 22px;
   height: 22px;
-  border: 1px solid #111111;
+  border: 1px solid #1d1712;
   border-radius: 0;
-  background: #111111;
+  background: #1d1712;
   transition: transform 160ms ease;
 }
 
 .coffee-range:hover::-moz-range-thumb {
   transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-orbit-one {
+    left: -10rem;
+  }
+
+  .flow-orbit-two {
+    right: -15rem;
+    bottom: 16rem;
+  }
+
+  .schedule-chip {
+    font-size: 0.72rem;
+    padding: 0.55rem 0.75rem;
+  }
 }

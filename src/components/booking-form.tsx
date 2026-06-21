@@ -145,19 +145,19 @@ export function BookingForm({ locale }: BookingFormProps) {
 
   return (
     <form
-      className="w-full max-w-[680px] space-y-3"
+      className="w-full max-w-[680px] space-y-4 rounded-[1.75rem] border border-[#1d1712]/12 bg-[#fffaf0]/78 p-4 shadow-[0_24px_70px_rgba(68,54,43,0.13)] backdrop-blur-xl sm:p-5"
       onSubmit={handleSubmit}
       data-testid="booking-form"
     >
-      <label className="space-y-1.5 text-sm font-medium text-[#111]">
+      <label className="space-y-1.5 text-sm font-medium text-[#1d1712]">
         <span>{copy.email}</span>
         <span className="relative block">
           <Mail
-            className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#555]"
+            className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7c6d60]"
             aria-hidden
           />
           <input
-            className="h-11 w-full rounded-none border border-[#111] bg-white px-11 text-[15px] text-[#111] outline-none transition focus:ring-2 focus:ring-[#111]"
+            className="h-12 w-full rounded-full border border-[#1d1712]/15 bg-white/90 px-11 text-[15px] text-[#1d1712] outline-none transition placeholder:text-[#8a7b6c] focus:border-[#095456] focus:ring-2 focus:ring-[#095456]/25"
             type="email"
             required
             placeholder={copy.emailPlaceholder}
@@ -168,7 +168,7 @@ export function BookingForm({ locale }: BookingFormProps) {
       </label>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-[#111]">{copy.location}</legend>
+        <legend className="text-sm font-medium text-[#1d1712]">{copy.location}</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {bookingLocations.map((option) => {
             const Icon = option.icon;
@@ -178,10 +178,10 @@ export function BookingForm({ locale }: BookingFormProps) {
               <button
                 key={option.id}
                 type="button"
-                className={`flex min-h-10 items-center justify-center gap-2 border px-4 text-sm font-medium transition ${
+                className={`flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium transition ${
                   isSelected
-                    ? "border-[#111] bg-[#111] text-white"
-                    : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
+                    ? "border-[#095456] bg-[#095456] text-[#fffaf0] shadow-[0_12px_28px_rgba(9,84,86,0.22)]"
+                    : "border-[#1d1712]/15 bg-white/80 text-[#1d1712] hover:-translate-y-0.5 hover:bg-white"
                 }`}
                 aria-pressed={isSelected}
                 onClick={() => handleLocationChange(option.id)}
@@ -195,10 +195,10 @@ export function BookingForm({ locale }: BookingFormProps) {
       </fieldset>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_160px]">
-        <label className="space-y-1.5 text-sm font-medium text-[#111]">
+        <label className="space-y-1.5 text-sm font-medium text-[#1d1712]">
           <span>{copy.date}</span>
           <input
-            className="h-10 w-full rounded-none border border-[#111] bg-white px-4 text-[15px] text-[#111] outline-none transition focus:ring-2 focus:ring-[#111]"
+            className="h-11 w-full rounded-full border border-[#1d1712]/15 bg-white/90 px-4 text-[15px] text-[#1d1712] outline-none transition focus:border-[#095456] focus:ring-2 focus:ring-[#095456]/25"
             type="date"
             required
             value={booking.date}
@@ -206,15 +206,15 @@ export function BookingForm({ locale }: BookingFormProps) {
           />
         </label>
 
-        <label className="space-y-1.5 text-sm font-medium text-[#111]">
+        <label className="space-y-1.5 text-sm font-medium text-[#1d1712]">
           <span>{copy.time}</span>
           <span className="relative block">
             <Clock
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#555]"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7c6d60]"
               aria-hidden
             />
             <select
-              className="h-10 w-full appearance-none rounded-none border border-[#111] bg-white px-10 text-[15px] text-[#111] outline-none transition focus:ring-2 focus:ring-[#111]"
+              className="h-11 w-full appearance-none rounded-full border border-[#1d1712]/15 bg-white/90 px-10 text-[15px] text-[#1d1712] outline-none transition focus:border-[#095456] focus:ring-2 focus:ring-[#095456]/25"
               value={booking.time}
               onChange={(event) => updateBooking({ time: event.target.value })}
             >
@@ -228,10 +228,10 @@ export function BookingForm({ locale }: BookingFormProps) {
         </label>
       </div>
 
-      <label className="space-y-1.5 text-sm font-medium text-[#111]">
+      <label className="space-y-1.5 text-sm font-medium text-[#1d1712]">
         <span>{copy.timezone}</span>
         <select
-          className="h-10 w-full rounded-none border border-[#111] bg-white px-4 text-[15px] text-[#111] outline-none transition disabled:bg-[#f5f5f5] focus:ring-2 focus:ring-[#111]"
+          className="h-11 w-full rounded-full border border-[#1d1712]/15 bg-white/90 px-4 text-[15px] text-[#1d1712] outline-none transition disabled:bg-[#eee4d6] focus:border-[#095456] focus:ring-2 focus:ring-[#095456]/25"
           value={booking.timezone}
           disabled={!isOnline}
           onChange={(event) =>
@@ -244,13 +244,13 @@ export function BookingForm({ locale }: BookingFormProps) {
             </option>
           ))}
         </select>
-        <span className="block text-xs leading-5 text-[#555]">
+        <span className="block text-xs leading-5 text-[#7c6d60]">
           {isOnline ? copy.timezoneHint : selectedLocation.description[locale]}
         </span>
       </label>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-[#111]">{copy.format}</legend>
+        <legend className="text-sm font-medium text-[#1d1712]">{copy.format}</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {conversationFormats.map((option) => {
             const Icon = option.icon;
@@ -260,10 +260,10 @@ export function BookingForm({ locale }: BookingFormProps) {
               <button
                 key={option.id}
                 type="button"
-                className={`flex min-h-10 items-center justify-center gap-2 border px-3 text-sm font-medium transition ${
+                className={`flex min-h-11 items-center justify-center gap-2 rounded-full border px-3 text-sm font-medium transition ${
                   isSelected
-                    ? "border-[#111] bg-[#111] text-white"
-                    : "border-[#111] bg-white text-[#111] hover:bg-[#f2f2f2]"
+                    ? "border-[#1d1712] bg-[#1d1712] text-[#fffaf0]"
+                    : "border-[#1d1712]/15 bg-white/80 text-[#1d1712] hover:-translate-y-0.5 hover:bg-white"
                 }`}
                 aria-pressed={isSelected}
                 onClick={() => updateBooking({ format: option.id })}
@@ -276,21 +276,21 @@ export function BookingForm({ locale }: BookingFormProps) {
         </div>
       </fieldset>
 
-      <label className="space-y-1.5 text-sm font-medium text-[#111]">
+      <label className="space-y-1.5 text-sm font-medium text-[#1d1712]">
         <span>{copy.note}</span>
         <span className="relative block">
           <MessageCircle
-            className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-[#555]"
+            className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-[#7c6d60]"
             aria-hidden
           />
           <textarea
-            className="min-h-[74px] w-full resize-none rounded-none border border-[#111] bg-white px-11 py-3 text-[15px] leading-6 text-[#111] outline-none transition placeholder:text-[#777] focus:ring-2 focus:ring-[#111]"
+            className="min-h-[86px] w-full resize-none rounded-[1.25rem] border border-[#1d1712]/15 bg-white/90 px-11 py-3 text-[15px] leading-6 text-[#1d1712] outline-none transition placeholder:text-[#8a7b6c] focus:border-[#095456] focus:ring-2 focus:ring-[#095456]/25"
             maxLength={500}
             placeholder={copy.notePlaceholder}
             value={booking.note}
             onChange={(event) => updateBooking({ note: event.target.value })}
           />
-          <span className="absolute bottom-3 right-4 text-xs text-[#555]">
+          <span className="absolute bottom-3 right-4 text-xs text-[#7c6d60]">
             {noteCount}/500
           </span>
         </span>
@@ -307,7 +307,7 @@ export function BookingForm({ locale }: BookingFormProps) {
       </label>
 
       <button
-        className="group flex h-11 w-full items-center justify-center gap-3 border border-[#111] bg-[#111] px-5 text-base font-semibold text-white transition hover:bg-white hover:text-[#111] focus:outline-none focus:ring-2 focus:ring-[#111] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="group flex h-12 w-full items-center justify-center gap-3 rounded-full border border-[#1d1712] bg-[#1d1712] px-5 text-base font-semibold text-[#fffaf0] shadow-[0_16px_34px_rgba(29,23,18,0.2)] transition hover:-translate-y-0.5 hover:bg-[#e7a64e] hover:text-[#1d1712] focus:outline-none focus:ring-2 focus:ring-[#095456] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         type="submit"
         disabled={submitState.type === "sending"}
       >
@@ -318,12 +318,12 @@ export function BookingForm({ locale }: BookingFormProps) {
         />
       </button>
 
-      <p className="text-center text-xs leading-5 text-[#555]">{copy.privacy}</p>
+      <p className="text-center text-xs leading-5 text-[#7c6d60]">{copy.privacy}</p>
 
       <div aria-live="polite">
         {submitState.type === "success" ? (
           <div
-            className="flex items-start gap-3 border border-[#111] bg-white p-4 text-sm text-[#111]"
+            className="flex items-start gap-3 rounded-2xl border border-[#095456]/25 bg-white/86 p-4 text-sm text-[#1d1712]"
             data-testid="booking-confirmation"
           >
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
@@ -340,7 +340,7 @@ export function BookingForm({ locale }: BookingFormProps) {
 
         {submitState.type === "error" ? (
           <div
-            className="flex items-start gap-3 border border-[#111] bg-white p-4 text-sm text-[#111]"
+            className="flex items-start gap-3 rounded-2xl border border-[#a4442f]/25 bg-white/86 p-4 text-sm text-[#1d1712]"
             data-testid="booking-error"
           >
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
